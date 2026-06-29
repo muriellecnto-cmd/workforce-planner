@@ -1,0 +1,2653 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Workforce Planner</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f7f4ef;--bg2:#f0ece4;--surface:#ffffff;--surface2:#faf8f5;
+  --border:#e8e2d9;--border2:#d4ccbf;
+  --text:#2a2520;--text2:#6b6258;--muted:#9e9488;
+  --accent:#3d3530;--accent2:#5c4f47;
+  --red:#c0392b;--red-bg:#fdf0ee;--red-dot:#e74c3c;
+  --amber:#b8700a;--amber-bg:#fdf6ec;--amber-dot:#e67e22;
+  --green:#1e6b45;--green-bg:#eef7f2;--green-dot:#27ae60;
+  --slate:#5a6475;--slate-bg:#f0f2f5;--slate-dot:#7f8c9a;
+  --blue:#1e4d8c;--blue-bg:#eef3fb;--blue-dot:#3b82f6;
+  --purple:#5b21b6;--purple-bg:#f3f0fd;--purple-dot:#7c3aed;
+  --teal:#0f6b5c;--teal-bg:#edfaf7;--teal-dot:#0d9488;
+  --radius:12px;
+  --shadow:0 1px 3px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.04);
+  --shadow-lg:0 8px 40px rgba(0,0,0,.12);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.5;overflow-x:hidden}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+::-webkit-scrollbar-thumb:hover{background:var(--muted)}
+
+/* LOGIN */
+#login-screen{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:var(--bg)}
+.login-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:40px;width:420px;max-width:92vw;box-shadow:var(--shadow-lg)}
+.login-brand{display:flex;align-items:center;gap:12px;margin-bottom:28px}
+.login-mark{width:44px;height:44px;border-radius:10px;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:18px}
+.login-title{font-size:18px;font-weight:600}
+.login-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.login-err{background:var(--red-bg);border:1px solid var(--red);color:var(--red);font-size:12px;padding:8px 12px;border-radius:8px;margin-bottom:16px;display:none}
+.login-err.show{display:block}
+
+/* APP SHELL */
+#app{display:none}
+#app.show{display:flex;min-height:100vh}
+.sidebar{width:240px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:50}
+.sidebar-brand{padding:20px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.sb-mark{width:34px;height:34px;border-radius:8px;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px}
+.sb-title{font-size:14px;font-weight:600;letter-spacing:-0.2px}
+.sb-sub{font-size:10px;color:var(--muted);margin-top:1px}
+.nav{flex:1;padding:14px 10px;overflow-y:auto}
+.nav-section{margin-bottom:18px}
+.nav-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);padding:0 12px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer;font-size:13px;color:var(--text2);transition:all .12s;margin-bottom:2px;border:none;background:none;width:100%;text-align:left;font-family:'Poppins',sans-serif;font-weight:500}
+.nav-item:hover{background:var(--bg2);color:var(--text)}
+.nav-item.active{background:var(--accent);color:#fff}
+.nav-item svg{width:15px;height:15px;flex-shrink:0}
+.nav-count{margin-left:auto;background:var(--bg2);color:var(--muted);font-size:10px;font-family:'JetBrains Mono',monospace;padding:1px 7px;border-radius:10px;min-width:22px;text-align:center;font-weight:600}
+.nav-item.active .nav-count{background:rgba(255,255,255,.2);color:#fff}
+.sb-user{padding:12px 16px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:600;flex-shrink:0}
+.avatar.adm{background:linear-gradient(135deg,var(--purple),var(--red))}
+.usr-info{flex:1;min-width:0}
+.usr-name{font-size:12px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.usr-role{font-size:10px;color:var(--muted)}
+.ico-btn{width:28px;height:28px;border-radius:7px;border:1px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);transition:all .12s}
+.ico-btn:hover{background:var(--bg2);color:var(--text)}
+.ico-btn svg{width:13px;height:13px}
+
+.main{flex:1;margin-left:240px;margin-right:320px;padding:28px 32px 60px;min-height:100vh;padding-top:64px}
+
+.rsidebar{width:320px;background:var(--surface);border-left:1px solid var(--border);position:fixed;top:0;right:0;bottom:0;z-index:40;display:flex;flex-direction:column}
+.rsb-header{padding:18px 22px;border-bottom:1px solid var(--border)}
+.rsb-title{font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px}
+.rsb-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.rsb-body{flex:1;overflow-y:auto;padding:18px 22px}
+
+.sync-bar{position:fixed;top:0;left:240px;right:320px;height:44px;z-index:30;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;padding:0 32px;font-size:11px;color:var(--muted)}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--border2);flex-shrink:0;transition:all .2s}
+.sync-dot.ok{background:var(--green-dot);box-shadow:0 0 0 3px var(--green-bg)}
+.sync-dot.busy{background:var(--amber-dot);animation:pulse 1s infinite}
+.sync-dot.err{background:var(--red-dot)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* HEADER */
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:14px}
+.page-title{font-size:22px;font-weight:600;letter-spacing:-0.5px}
+.page-sub{font-size:12px;color:var(--muted);margin-top:3px;font-weight:300;font-style:italic}
+.page-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:500;font-family:'Poppins',sans-serif;cursor:pointer;border:none;transition:all .15s;white-space:nowrap}
+.btn svg{width:13px;height:13px;flex-shrink:0}
+.btn-outline{background:transparent;border:1px solid var(--border2);color:var(--text2)}
+.btn-outline:hover{background:var(--bg2);border-color:var(--accent);color:var(--accent)}
+.btn-dark{background:var(--accent);color:#fff;border:1px solid var(--accent)}
+.btn-dark:hover{background:var(--accent2)}
+.btn-sm{padding:6px 10px;font-size:11px}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:14px;box-shadow:var(--shadow)}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px}
+.card-title{font-size:13px;font-weight:600}
+.card-sub{font-size:11px;color:var(--muted);margin-top:2px;font-weight:300}
+
+/* FORMS */
+.field{margin-bottom:10px}
+.field label{display:block;font-size:10px;color:var(--muted);margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.field input,.field select,.field textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 11px;color:var(--text);font-family:'Poppins',sans-serif;font-size:13px;outline:none;transition:all .15s}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent2);background:#fff}
+.field textarea{resize:vertical;min-height:60px;line-height:1.5}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form-row.f3{grid-template-columns:1fr 1fr 1fr}
+.form-row.f4{grid-template-columns:1fr 1fr 1fr 1fr}
+.field-hint{font-size:10px;color:var(--muted);margin-top:3px}
+.field-warn{font-size:10px;color:var(--amber);margin-top:3px;font-weight:500}
+.fld-badge{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;font-size:9.5px;border-radius:50%;margin-left:6px;vertical-align:middle;cursor:help}
+.fld-badge.edit{background:var(--blue-bg);color:var(--blue)}
+.fld-badge.lock{background:var(--bg2);color:var(--muted)}
+.field.is-locked input,.field.is-locked select{cursor:default;color:var(--text2)}
+.field.is-locked>div[style*="background:var(--surface2)"]{position:relative}
+.res-grid .res-cell::after{content:'🔒';position:absolute;top:6px;right:8px;font-size:9px;opacity:.35}
+.res-cell{position:relative}
+.help-ico{width:26px;height:26px;border-radius:50%;border:1px solid var(--border);background:var(--surface);color:var(--text2);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .15s}
+.help-ico:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+.help-pop{position:absolute;top:38px;right:0;width:340px;background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow-lg);padding:16px;z-index:200;display:none}
+.help-pop.open{display:block}
+.help-pop h4{font-size:12px;font-weight:700;color:var(--text);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.help-pop-row{display:flex;align-items:flex-start;gap:8px;margin-bottom:9px;font-size:11.5px;line-height:1.45}
+.help-pop-row:last-child{margin-bottom:0}
+.help-pop .fld-badge{flex-shrink:0;margin-left:0;margin-top:1px}
+.help-pop-row span.txt{color:var(--text2)}
+.field-error input,.field-error select{border-color:var(--red);background:var(--red-bg)}
+.field-err-msg{font-size:10px;color:var(--red);margin-top:3px}
+
+/* ACT */
+.wp-act{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:12px;box-shadow:var(--shadow)}
+.wp-act-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:10px}
+.wp-act-label{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.wp-act-name{font-size:14px;font-weight:600;color:var(--text)}
+
+.day-picker{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}
+.day-btn{width:30px;height:30px;border-radius:7px;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;transition:all .12s;font-family:'Poppins',sans-serif;display:flex;align-items:center;justify-content:center}
+.day-btn.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.day-btn:hover:not(.on):not(:disabled){border-color:var(--accent2);color:var(--accent)}
+.day-btn:disabled{opacity:.4;cursor:not-allowed}
+.plage-info{font-size:10px;color:var(--muted);margin-top:4px;font-family:'JetBrains Mono',monospace}
+
+.vol-period{display:flex;gap:4px;margin-top:4px}
+.vol-period button{padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-size:10px;font-weight:600;cursor:pointer;transition:all .12s;font-family:'Poppins',sans-serif;text-transform:uppercase;letter-spacing:.04em}
+.vol-period button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+/* RESULT */
+.res-grid{display:grid;gap:8px;margin-top:14px}
+.res-grid.r3{grid-template-columns:repeat(3,1fr)}
+.res-grid.r4{grid-template-columns:repeat(4,1fr)}
+.res-grid.r5{grid-template-columns:repeat(5,1fr)}
+.res-grid.r6{grid-template-columns:repeat(6,1fr)}
+.res-cell{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;text-align:center}
+.res-lbl{font-size:9px;color:var(--muted);margin-bottom:4px;line-height:1.3;font-weight:500;text-transform:uppercase;letter-spacing:.04em}
+.res-val{font-size:15px;font-weight:700;font-family:'JetBrains Mono',monospace;letter-spacing:-0.5px}
+.res-val.g{color:var(--green)}.res-val.b{color:var(--blue)}.res-val.a{color:var(--amber)}.res-val.p{color:var(--purple)}.res-val.m{color:var(--text2)}
+
+/* SHRINKAGE */
+.sh-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.sh-row:last-child{border-bottom:none}
+.sh-name{flex:1;font-size:12px;color:var(--text2)}
+.sh-inp{width:62px;text-align:right;font-family:'JetBrains Mono',monospace;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:5px 8px;color:var(--text);font-size:12px;outline:none}
+.sh-inp:focus{border-color:var(--accent2);background:#fff}
+.shr-banner{display:flex;align-items:center;gap:8px;background:var(--blue-bg);border:1px solid var(--blue);border-radius:8px;padding:8px 12px;font-size:11px;color:var(--blue);margin-bottom:12px}
+.shr-banner.warn{background:var(--amber-bg);border-color:var(--amber);color:var(--amber)}
+.taux-row{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}
+.taux-chip{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:4px 10px;font-size:10px;color:var(--muted)}
+.taux-chip b{color:var(--accent);font-family:'JetBrains Mono',monospace}
+
+.ep{display:inline-flex;padding:1px 7px;background:var(--purple-bg);color:var(--purple);border-radius:10px;font-size:9px;font-weight:700;font-family:'JetBrains Mono',monospace}
+
+.ptabs{display:flex;gap:4px;background:var(--bg2);border-radius:8px;padding:3px;margin-bottom:14px}
+.ptab{flex:1;padding:7px;border:none;background:transparent;border-radius:6px;cursor:pointer;font-size:11px;font-weight:600;color:var(--muted);font-family:'Poppins',sans-serif;transition:all .15s;text-align:center}
+.ptab.on{background:#fff;color:var(--accent);box-shadow:0 1px 3px rgba(0,0,0,.06)}
+
+.sim-bar{margin-bottom:8px}
+.sim-bar-row{display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px}
+.sim-track{height:4px;background:var(--bg2);border-radius:2px;overflow:hidden}
+.sim-fill{height:100%;border-radius:2px;transition:width .3s}
+.sim-summary-table{width:100%;border-collapse:collapse;font-size:11.5px;margin-top:6px}
+.sim-summary-table th{text-align:right;padding:6px 10px;color:var(--muted);font-weight:600;font-size:10px;border-bottom:1px solid var(--border)}
+.sim-summary-table th:first-child{text-align:left}
+.sim-summary-table td{text-align:right;padding:6px 10px;border-bottom:1px solid var(--border);font-family:'JetBrains Mono',monospace}
+.sim-summary-table td:first-child{text-align:left;font-family:'Poppins',sans-serif;color:var(--text2)}
+.sim-summary-table tbody tr:hover td{background:var(--surface2)}
+
+.fbox{font-size:11px;color:var(--text2);line-height:1.9}
+.fbox b{color:var(--text);font-weight:600}
+.fbox .formule-title{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--accent);margin:14px 0 6px;padding-bottom:4px;border-bottom:1px solid var(--border)}
+.fbox .formule-title:first-child{margin-top:0}
+
+.total-bar{display:flex;justify-content:flex-end;gap:18px;padding:12px 18px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);font-size:11px;flex-wrap:wrap;box-shadow:var(--shadow);margin-bottom:12px}
+.total-bar b{font-family:'JetBrains Mono',monospace}
+
+.cmt-toggle{font-size:11px;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:6px;margin-top:10px;user-select:none}
+.cmt-toggle:hover{color:var(--text2)}
+
+/* DASHBOARD */
+.dash-kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--c,var(--accent))}
+.kpi-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:8px}
+.kpi-val{font-size:28px;font-weight:700;line-height:1;letter-spacing:-1px}
+.kpi-sub{font-size:11px;color:var(--muted);margin-top:4px;font-weight:300;font-style:italic}
+
+.scenario-table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.scenario-table thead th{padding:11px 16px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);border-bottom:1px solid var(--border);background:var(--surface2);white-space:nowrap}
+.scenario-table tbody tr{border-bottom:1px solid var(--border);transition:background .1s;cursor:pointer}
+.scenario-table tbody tr:last-child{border-bottom:none}
+.scenario-table tbody tr:hover{background:var(--bg)}
+.scenario-table td{padding:12px 16px;vertical-align:middle;font-size:12px}
+.empty-dash{text-align:center;padding:64px 20px;color:var(--muted)}
+
+.scenario-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:600;white-space:nowrap}
+.scenario-badge.bo{background:var(--amber-bg);color:var(--amber)}
+.scenario-badge.out{background:var(--green-bg);color:var(--green)}
+.scenario-badge.sim{background:var(--purple-bg);color:var(--purple)}
+
+/* MODAL NEW DIM */
+.modal-overlay{position:fixed;inset:0;background:rgba(42,37,32,.5);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;z-index:200;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;width:680px;max-width:96vw;box-shadow:var(--shadow-lg);transform:translateY(12px) scale(.98);transition:transform .2s}
+.modal-overlay.open .modal{transform:none}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.modal-title{font-size:18px;font-weight:600}
+.modal-sub{font-size:12px;color:var(--muted);margin-bottom:24px;font-style:italic}
+.modal-close{width:30px;height:30px;border-radius:8px;border:1px solid var(--border);background:transparent;cursor:pointer;font-size:14px;color:var(--muted);display:flex;align-items:center;justify-content:center}
+
+.choice-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:8px}
+.choice-card{background:var(--surface2);border:2px solid var(--border);border-radius:var(--radius);padding:20px 16px;cursor:pointer;transition:all .15s;text-align:center}
+.choice-card:hover{border-color:var(--accent);background:#fff;transform:translateY(-2px);box-shadow:var(--shadow)}
+.choice-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:22px}
+.choice-name{font-size:14px;font-weight:600;margin-bottom:6px}
+.choice-desc{font-size:11px;color:var(--muted);line-height:1.5}
+
+/* HISTORY */
+.hi-item{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:6px;cursor:pointer;transition:all .12s}
+.hi-item:hover{border-color:var(--border2);background:#fff}
+.hi-item.editing{border-color:var(--accent);background:#fff;box-shadow:0 0 0 2px var(--bg2)}
+.hi-hdr{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.hi-tag{padding:2px 7px;border-radius:10px;font-size:9px;font-weight:600;font-family:'JetBrains Mono',monospace}
+.hi-nm{font-size:12px;font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hi-meta{font-size:10px;color:var(--muted);line-height:1.4}
+.hi-acts{display:flex;gap:4px;margin-top:6px}
+.hi-btn{width:24px;height:24px;border:1px solid var(--border);border-radius:6px;background:transparent;cursor:pointer;font-size:11px;display:inline-flex;align-items:center;justify-content:center;color:var(--muted);transition:all .12s}
+.hi-btn:hover{background:var(--bg2);color:var(--text)}
+
+/* TOOLTIP */
+.tip{position:relative;display:inline-flex;align-items:center;justify-content:center;width:13px;height:13px;border-radius:50%;background:var(--border2);color:var(--surface);font-size:8px;font-weight:700;cursor:help;margin-left:4px;vertical-align:middle}
+.tip::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;font-size:10px;font-weight:400;line-height:1.5;padding:7px 10px;border-radius:7px;white-space:pre-line;width:220px;z-index:999;opacity:0;pointer-events:none;transition:opacity .15s}
+.tip:hover::after{opacity:1}
+
+/* TOAST */
+#toasts{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px}
+.toast{background:var(--accent);color:#fff;padding:10px 16px;border-radius:8px;font-size:12px;box-shadow:var(--shadow-lg);animation:slideIn .25s ease}
+.toast.err{background:var(--red)}
+.toast.warn{background:var(--amber)}
+@keyframes slideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
+
+/* ADMIN */
+.user-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);font-size:12px}
+.user-row:last-child{border-bottom:none}
+.user-badge{padding:2px 8px;border-radius:10px;font-size:9px;font-weight:600;background:var(--green-bg);color:var(--green)}
+.user-badge.admin{background:var(--purple-bg);color:var(--purple)}
+
+@media(max-width:1200px){
+  .rsidebar{transform:translateX(100%);transition:transform .25s}
+  .rsidebar.open{transform:none;box-shadow:var(--shadow-lg)}
+  .main{margin-right:0}
+  .sync-bar{right:0}
+}
+@media(max-width:900px){
+  .sidebar{transform:translateX(-100%);transition:transform .25s}
+  .sidebar.open{transform:none}
+  .main{margin-left:0;padding:60px 18px 40px}
+  .sync-bar{left:0}
+  .res-grid.r6,.res-grid.r5{grid-template-columns:repeat(3,1fr)}
+  .res-grid.r4{grid-template-columns:repeat(2,1fr)}
+  .form-row,.form-row.f3,.form-row.f4{grid-template-columns:1fr}
+  .dash-kpi{grid-template-columns:repeat(2,1fr)}
+  .choice-grid{grid-template-columns:1fr}
+}
+@media print{
+  .sidebar,.rsidebar,.sync-bar,.page-actions,.hi-acts,.cmt-toggle,.btn{display:none!important}
+  .main{margin:0;padding:16px}
+  body{background:#fff}
+}
+#pdf-export-zone{display:none}
+body.pdf-compact #pdf-export-zone{
+  display:block;position:fixed;top:0;left:0;right:0;width:210mm;min-height:297mm;margin:0 auto;background:#fff;z-index:99999;
+  padding:10mm 12mm;box-sizing:border-box;font-family:'Poppins',sans-serif;color:#2a2520;
+}
+body.pdf-compact .app,body.pdf-compact .login-screen,body.pdf-compact #login-screen{display:none!important}
+.pdf-header{display:flex;align-items:center;gap:10px;border-bottom:2px solid #3d3530;padding-bottom:8px;margin-bottom:10px}
+.pdf-logo{width:34px;height:34px;border-radius:8px;background:#3d3530;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;font-family:'Poppins',sans-serif;flex-shrink:0}
+.pdf-brand{font-size:16px;font-weight:700;color:#2a2520;line-height:1.1}
+.pdf-brand-sub{font-size:10px;color:#6b6258;margin-top:1px;font-weight:500}
+.pdf-meta{margin-left:auto;text-align:right;font-size:9.5px;color:#9e9488;line-height:1.45}
+.pdf-section-title{font-size:11.5px;font-weight:600;color:#3d3530;margin:10px 0 6px;text-transform:uppercase;letter-spacing:.05em}
+.pdf-table{width:100%;border-collapse:collapse;margin-bottom:8px;font-size:10.5px}
+.pdf-table th{background:#3d3530;color:#fff;padding:5px 8px;text-align:left;font-weight:600;font-size:10px}
+.pdf-table td{padding:4px 8px;border-bottom:1px solid #e8e2d9;color:#2a2520}
+.pdf-table tr:nth-child(even) td{background:#faf8f5}
+.pdf-table td.num,.pdf-table th.num{text-align:right;font-family:'JetBrains Mono',monospace}
+.pdf-table tr.total td{background:#eef7f2;color:#1e6b45;font-weight:700;border-top:1.5px solid #1e6b45}
+.pdf-kpis{display:flex;gap:6px;margin-bottom:8px}
+.pdf-kpi{flex:1;border:1px solid #e8e2d9;border-radius:6px;padding:7px 8px;text-align:center;background:#faf8f5}
+.pdf-kpi-lbl{font-size:8px;color:#9e9488;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;font-weight:600}
+.pdf-kpi-val{font-size:15px;font-weight:700;color:#2a2520;font-family:'JetBrains Mono',monospace}
+.pdf-foot{margin-top:10px;font-size:8px;color:#9e9488;text-align:center;border-top:1px solid #e8e2d9;padding-top:6px}
+.pdf-mini-table{font-size:8.5px!important}
+.pdf-mini-table th,.pdf-mini-table td{padding:3px 4px!important}
+@media print{
+  @page{size:A4 portrait;margin:0}
+  html,body{margin:0!important;padding:0!important}
+  body.pdf-compact #pdf-export-zone{position:absolute!important;top:0!important;left:0!important;right:auto!important;width:210mm!important;margin:0!important;padding:10mm 12mm!important}
+  body.pdf-compact *{visibility:hidden}
+  body.pdf-compact #pdf-export-zone,body.pdf-compact #pdf-export-zone *{visibility:visible}
+}
+
+/* ═══════════ DASHBOARD ENRICHI ═══════════ */
+
+/* KPI STRIP — ligne unique compacte */
+.kpi-strip{display:flex;align-items:stretch;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:14px}
+.kpi-strip-item{flex:1;display:flex;flex-direction:column;justify-content:center;padding:12px 16px;border-right:1px solid var(--border);position:relative;min-width:0}
+.kpi-strip-item:last-child{border-right:none}
+.kpi-strip-item::before{content:'';position:absolute;top:0;left:0;width:100%;height:3px;background:var(--c,var(--accent))}
+.kpi-strip-lbl{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi-strip-val{font-size:20px;font-weight:700;line-height:1;letter-spacing:-0.5px;font-family:'JetBrains Mono',monospace}
+.kpi-strip-sub{font-size:10px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(max-width:1100px){.kpi-strip{flex-wrap:wrap}.kpi-strip-item{flex:1 1 calc(33% - 1px);border-bottom:1px solid var(--border)}}
+@media(max-width:600px){.kpi-strip-item{flex:1 1 calc(50% - 1px)}}
+
+/* DASH TOP ROW = kpi-strip + donut compact côte à côte */
+.dash-top{display:flex;gap:14px;align-items:flex-start;margin-bottom:14px}
+.dash-top .kpi-strip{flex:1;margin-bottom:0}
+.donut-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;box-shadow:var(--shadow);flex-shrink:0;width:220px}
+.donut-wrap{display:flex;align-items:center;gap:14px}
+.donut-svg{width:72px;height:72px;flex-shrink:0}
+.donut-legend{flex:1;display:flex;flex-direction:column;gap:6px}
+.donut-leg-row{display:flex;align-items:center;gap:7px;font-size:11px}
+.donut-leg-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+.donut-leg-lbl{flex:1;color:var(--text2)}
+.donut-leg-val{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--text);font-size:11px}
+@media(max-width:1000px){.dash-top{flex-direction:column}.donut-card{width:100%}}
+
+.kpi-trend{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:2px 6px;border-radius:10px;margin-left:6px}
+.kpi-trend.up{background:var(--green-bg);color:var(--green)}
+.kpi-trend.down{background:var(--red-bg);color:var(--red)}
+.kpi-trend.flat{background:var(--bg2);color:var(--muted)}
+
+.dash-toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;box-shadow:var(--shadow)}
+.search-box{flex:1;min-width:200px;position:relative}
+.search-box input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 11px 8px 32px;font-family:'Poppins',sans-serif;font-size:13px;outline:none;color:var(--text);transition:all .15s}
+.search-box input:focus{border-color:var(--accent2);background:#fff}
+.search-box svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:var(--muted);pointer-events:none}
+
+.filter-chips{display:flex;gap:6px;flex-wrap:wrap}
+.filter-chip{padding:6px 12px;border-radius:20px;font-size:11px;font-weight:500;border:1px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer;font-family:'Poppins',sans-serif;transition:all .12s}
+.filter-chip:hover{border-color:var(--accent);color:var(--accent)}
+.filter-chip.active{background:var(--accent);border-color:var(--accent);color:#fff}
+
+.sort-select{padding:7px 11px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);font-size:12px;font-family:'Poppins',sans-serif;color:var(--text);cursor:pointer;outline:none}
+.sort-select:focus{border-color:var(--accent2);background:#fff}
+
+/* PAGINATION */
+.dash-pagination{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius) var(--radius);font-size:11px;color:var(--muted)}
+.dash-pagination .pg-info{font-style:italic}
+.dash-pagination .pg-btns{display:flex;gap:4px;align-items:center}
+.pg-btn{width:28px;height:28px;border-radius:6px;border:1px solid var(--border);background:transparent;cursor:pointer;font-size:11px;font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--text2);display:inline-flex;align-items:center;justify-content:center;transition:all .12s}
+.pg-btn:hover:not(:disabled){background:var(--bg2);border-color:var(--accent2);color:var(--accent)}
+.pg-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.pg-btn:disabled{opacity:.35;cursor:not-allowed}
+
+.scenario-table .checkbox{width:14px;height:14px;cursor:pointer;accent-color:var(--accent)}
+.scenario-table tr.selected{background:var(--bg2)}
+
+.bulk-bar{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;border-radius:14px;padding:12px 20px;box-shadow:var(--shadow-lg);display:none;align-items:center;gap:14px;z-index:200;animation:slideUp .25s ease}
+.bulk-bar.show{display:flex}
+.bulk-bar-count{font-size:12px;font-weight:600}
+.bulk-bar-btn{background:rgba(255,255,255,.15);border:none;color:#fff;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;font-family:'Poppins',sans-serif;transition:all .12s}
+.bulk-bar-btn:hover{background:rgba(255,255,255,.25)}
+.bulk-bar-btn.danger{background:rgba(239,68,68,.3)}
+.bulk-bar-btn.danger:hover{background:rgba(239,68,68,.5)}
+@keyframes slideUp{from{transform:translate(-50%,20px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
+
+.modal-compare{width:96vw;max-width:1200px;max-height:90vh;overflow-y:auto}
+.compare-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:14px}
+.compare-table th{background:var(--surface2);padding:10px 12px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)}
+.compare-table td{padding:10px 12px;border-bottom:1px solid var(--border);font-family:'JetBrains Mono',monospace}
+.compare-table td:first-child{font-family:'Poppins',sans-serif;font-weight:500;color:var(--text2);background:var(--surface2)}
+.compare-table .row-best{background:var(--green-bg)}
+.compare-table .row-worst{background:var(--red-bg)}
+
+.empty-state{text-align:center;padding:60px 20px;background:var(--surface);border:1px dashed var(--border2);border-radius:var(--radius)}
+.empty-icon{font-size:48px;margin-bottom:16px;opacity:.6}
+.empty-title{font-size:16px;font-weight:600;margin-bottom:6px}
+.empty-sub{font-size:12px;color:var(--muted);margin-bottom:20px;max-width:400px;margin-left:auto;margin-right:auto}
+.empty-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+
+</style>
+</head>
+<body>
+
+<!-- ZONE EXPORT PDF (1 page, masquée à l'écran, affichée uniquement à l'impression) -->
+<div id="pdf-export-zone"></div>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-brand">
+      <div class="login-mark">WP</div>
+      <div><div class="login-title">Workforce Planner</div><div class="login-sub">Dimensionnement RH</div></div>
+    </div>
+    <div class="login-err" id="login-err"></div>
+    <div class="field"><label>Identifiant</label><input type="text" id="login-user" placeholder="ex : murielle" autocomplete="username" onkeydown="if(event.key==='Enter')document.getElementById('login-pw').focus()"></div>
+    <div class="field"><label>Mot de passe</label><input type="password" id="login-pw" placeholder="••••••••" autocomplete="current-password" onkeyup="if(event.key==='Enter'){event.preventDefault();doLogin()}"></div>
+    <button class="btn btn-dark" id="btn-login" style="width:100%;justify-content:center;padding:11px;margin-top:8px" onclick="doLogin()">Se connecter</button>
+    <div style="font-size:10px;color:var(--muted);text-align:center;margin-top:16px">Accès restreint</div>
+  </div>
+</div>
+
+<div id="toasts"></div>
+
+<!-- MODAL : NOUVEAU DIMENSIONNEMENT -->
+<div class="modal-overlay" id="modal-new">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Nouveau dimensionnement</div>
+        <div class="modal-sub">Choisissez le type de calcul</div>
+      </div>
+      <button class="modal-close" onclick="closeModalNew()">✕</button>
+    </div>
+    <div class="choice-grid">
+      <div class="choice-card" onclick="newDim('bo')">
+        <div class="choice-icon" style="background:var(--amber-bg);color:var(--amber)">📄</div>
+        <div class="choice-name">Back Office</div>
+        <div class="choice-desc">Flux entrant avec Erlang-C — file d'attente et niveau de service</div>
+      </div>
+      <div class="choice-card" onclick="newDim('out')">
+        <div class="choice-icon" style="background:var(--green-bg);color:var(--green)">📞</div>
+        <div class="choice-name">Sortants</div>
+        <div class="choice-desc">Campagne d'appels — taux d'aboutis et tentatives</div>
+      </div>
+      <div class="choice-card" onclick="newDim('sim')">
+        <div class="choice-icon" style="background:var(--purple-bg);color:var(--purple)">📊</div>
+        <div class="choice-name">Simulation ETP</div>
+        <div class="choice-desc">Volume à liquider — durée ou effectif nécessaires</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="sb-mark">WP</div>
+      <div style="flex:1;min-width:0">
+        <div class="sb-title">Workforce Planner</div>
+        <div class="sb-sub">Dimensionnement RH</div>
+      </div>
+    </div>
+    <nav class="nav">
+      <div class="nav-section">
+        <div class="nav-label">Vue d'ensemble</div>
+        <button class="nav-item" data-tab="dash" onclick="gotoTab('dash')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Tableau de bord
+        </button>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Mon profil</div>
+        <button class="nav-item" data-tab="sh" onclick="gotoTab('sh')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.6 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+          Mes shrinkages
+        </button>
+      </div>
+      <div id="nav-admin-slot"></div>
+      <div class="nav-section">
+        <div class="nav-label">Historique <span class="nav-count" id="hist-count">0</span></div>
+        <div id="hist-mini" style="padding:0 4px"></div>
+      </div>
+    </nav>
+    <div class="sb-user">
+      <div class="avatar" id="sb-av">?</div>
+      <div class="usr-info">
+        <div class="usr-name" id="sb-name">—</div>
+        <div class="usr-role" id="sb-role">—</div>
+      </div>
+      <button class="ico-btn" onclick="doLogout()" title="Déconnexion" style="color:var(--red)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <div class="sync-bar">
+    <div class="sync-dot" id="sync-dot"></div>
+    <span id="sync-status">Hors ligne</span>
+    <span style="margin-left:auto;display:flex;gap:6px;align-items:center">
+      <span id="last-sync" style="font-size:10px"></span>
+      <button class="btn btn-outline btn-sm" onclick="gasSync(true)" id="btn-manual-sync">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+        Synchroniser
+      </button>
+    </span>
+  </div>
+
+  <main class="main">
+    <div id="main-content"></div>
+  </main>
+
+  <aside class="rsidebar">
+    <div class="rsb-header">
+      <div class="rsb-title">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+        Paramètres & formules
+      </div>
+      <div class="rsb-sub" id="rsb-sub">Référentiel global</div>
+    </div>
+    <div class="rsb-body" id="rsb-body"></div>
+  </aside>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// CONFIG GAS
+// ═══════════════════════════════════════════════════════════════
+const GAS_URL='https://script.google.com/macros/s/AKfycbx21px3vQXT83-1RZVsfjdXxH_qvzZUOhr_nzOQ1eAaZbY2XHQ9fjx_HbYcEK7eHItaKA/exec';
+const AUTOSYNC_INTERVAL_MS=45000;
+const SAVE_DEBOUNCE_MS=1500;
+
+// ═══════════════════════════════════════════════════════════════
+// ERLANG-C
+// ═══════════════════════════════════════════════════════════════
+const LFC={};
+const lf=n=>n<=1?0:(LFC[n]||(LFC[n]=Math.log(n)+lf(n-1)));
+const erlangC=(A,N)=>{
+  if(A<=0||N<=0)return 0;if(A>=N)return 1;
+  let ln=N*Math.log(A)-lf(N)+Math.log(N)-Math.log(N-A),ts=[ln];
+  for(let k=0;k<N;k++)ts.push(k*Math.log(A)-lf(k));
+  const mx=Math.max(...ts),s=ts.reduce((a,t)=>a+Math.exp(t-mx),0);
+  return Math.exp(ln-mx)/s;
+};
+const erlangN=(lam,dmt,slS,slP)=>{
+  const A=lam*dmt;if(A<=0)return 1;
+  let N=Math.max(Math.ceil(A)+1,1);
+  for(let i=0;i<600;i++){if(1-erlangC(A,N)*Math.exp(-(N-A)*slS/dmt)>=slP)return N;N++;}
+  return N;
+};
+
+// ═══════════════════════════════════════════════════════════════
+// FORMAT
+// ═══════════════════════════════════════════════════════════════
+const f2=n=>isNaN(+n)?'—':(+n).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const f1=n=>isNaN(+n)?'—':(+n).toLocaleString('fr-FR',{minimumFractionDigits:1,maximumFractionDigits:1});
+const f0=n=>isNaN(+n)?'—':Math.round(+n).toLocaleString('fr-FR');
+const pct=n=>(+n*100).toLocaleString('fr-FR',{minimumFractionDigits:1,maximumFractionDigits:1})+'%';
+const h2=s=>{const h=Math.floor(s/3600),m=Math.floor((s%3600)/60);return h?`${h}h${m?m+'m':''}`:`${m}m`;};
+
+// ═══════════════════════════════════════════════════════════════
+// CONST + STATE
+// ═══════════════════════════════════════════════════════════════
+const HPM=173.33;
+const DEF_SHEXT=[{id:'cg',n:'Congés payés et fériés',v:10},{id:'to',n:'Turn Over',v:0},{id:'ab',n:'Absentéisme',v:0}];
+const DEF_SHINT=[{id:'fo',n:'Formation continue (3h / mois)',v:1.9},{id:'nc',n:'NCMS (3,14h / mois)',v:2.0},{id:'pa',n:'Pauses (5min/h)',v:8.1},{id:'np',n:'Heures non productives',v:0}];
+
+const TPL_BO ={id:1,nm:'Activité 1',vol:10000,volPeriod:'mois',jours:[1,2,3,4,5],hDebut:7,hFin:21,dmt:300,interactions:1,ss:86400,sp:99,hj:8,commentaire:'',showComment:false};
+const TPL_OUT={id:1,nm:'Activité 1',vol:5000,volPeriod:'mois',jours:[1,2,3,4,5],hDebut:7,hFin:21,ta:50,dma:300,dmna:20,tentatives:1,hj:8,commentaire:'',showComment:false};
+const TPL_SIM={type:'bo',nm:'Simulation 1',vol:10000,volPeriod:'mois',jours:[1,2,3,4,5],hDebut:7,hFin:21,dmt:300,ta:50,dma:300,dmna:20,tentatives:1,interactions:1,periodeAff:'mois',activite:'',commentaire:'',showComment:false};
+
+const STATE_KEY='wp_state';
+const CURRENT_VERSION=4;
+
+function loadState(){
+  try{
+    const r=localStorage.getItem(STATE_KEY);
+    if(r){
+      const data=JSON.parse(r);
+      // Migration future si besoin
+      if(!data.version||data.version<CURRENT_VERSION){
+        // ici on migre les anciens champs vers les nouveaux
+        data.version=CURRENT_VERSION;
+        localStorage.setItem(STATE_KEY,JSON.stringify(data));
+      }
+      return data;
+    }
+    // Fallback : récupérer les anciennes clés versionnées
+    for(const v of ['wp_state_v4','wp_state_v3','wp_state_v2']){
+      const old=localStorage.getItem(v);
+      if(old){
+        const data=JSON.parse(old);
+        data.version=CURRENT_VERSION;
+        localStorage.setItem(STATE_KEY,JSON.stringify(data));
+        console.log('[WP] Migré depuis '+v);
+        return data;
+      }
+    }
+  }catch(e){console.warn('[WP] loadState error:',e);}
+  return null;
+}
+
+function saveState(){
+  try{
+    localStorage.setItem(STATE_KEY,JSON.stringify({
+      version:CURRENT_VERSION,
+      shExtGlobal:S.shExtGlobal,shIntGlobal:S.shIntGlobal,
+      shExtUser:S.shExtUser,shIntUser:S.shIntUser,
+      sims:S.sims,nid:S.nid,bo:S.bo,out:S.out,sim:S.sim
+    }));
+  }catch(e){console.warn('[WP] saveState error:',e);}
+}
+
+const saved=loadState();
+const S={
+  tab:'dash',
+  editingSimId:null,
+  shExtGlobal:saved?.shExtGlobal||JSON.parse(JSON.stringify(DEF_SHEXT)),
+  shIntGlobal:saved?.shIntGlobal||JSON.parse(JSON.stringify(DEF_SHINT)),
+  shExtUser:saved?.shExtUser||JSON.parse(JSON.stringify(DEF_SHEXT)),
+  shIntUser:saved?.shIntUser||JSON.parse(JSON.stringify(DEF_SHINT)),
+  sims:saved?.sims||[],nid:saved?.nid||1,
+  bo:saved?.bo||{acts:[JSON.parse(JSON.stringify(TPL_BO))],nid:2},
+  out:saved?.out||{acts:[JSON.parse(JSON.stringify(TPL_OUT))],nid:2},
+  sim:saved?.sim||JSON.parse(JSON.stringify(TPL_SIM)),
+  gas:{lastSync:null,connected:false,busy:false},
+  user:(()=>{try{return JSON.parse(localStorage.getItem('wp_user'));}catch(e){return null;}})()
+};
+
+const txExt=()=>Math.max(1-S.shExtUser.reduce((a,x)=>a+(+x.v||0)/100,0),0.01);
+const txInt=()=>Math.max(1-S.shIntUser.reduce((a,x)=>a+(+x.v||0)/100,0),0.01);
+const txProd=()=>txExt()*txInt();
+const capaETPmois=()=>HPM*txProd();
+
+function shrinkagesModified(){
+  const cmp=(a,b)=>a.length===b.length&&a.every((x,i)=>+x.v===+b[i]?.v);
+  return !cmp(S.shExtUser,S.shExtGlobal)||!cmp(S.shIntUser,S.shIntGlobal);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// FORMAT ISO
+// ═══════════════════════════════════════════════════════════════
+
+function fmtDate(d){
+  if(!d) return '—';
+  // Si déjà au format français "05/06/26 17:42", on garde
+  if(typeof d==='string' && /^\d{2}\/\d{2}\/\d{2}/.test(d)) return d;
+  // Sinon on parse et on formate
+  try{
+    const dt=new Date(d);
+    if(isNaN(dt.getTime())) return d;
+    return dt.toLocaleString('fr-FR',{
+      day:'2-digit',month:'2-digit',year:'2-digit',
+      hour:'2-digit',minute:'2-digit'
+    });
+  }catch(e){return d;}
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+// PLANNING HELPERS
+// ═══════════════════════════════════════════════════════════════
+const JOUR_LABELS=['L','M','M','J','V','S','D'];
+function joursParMois(jours){return (jours||[]).length*(52/12);}
+function heurePlage(hd,hf){return Math.max(+(hf??20)-+(hd??8),0.5);}
+function joursLabel(jours){
+  if(!jours||!jours.length)return 'Aucun jour';
+  if(jours.length===7)return 'Lun – Dim (7j/7)';
+  if(jours.length===6&&!jours.includes(7))return 'Lun – Sam (6j/7)';
+  if(jours.length===5&&!jours.includes(6)&&!jours.includes(7))return 'Lun – Ven (5j/7)';
+  return jours.map(j=>JOUR_LABELS[j-1]).join(' ');
+}
+function toggleJour(arr,j){return arr.includes(j)?arr.filter(x=>x!==j):[...arr,j].sort((a,b)=>a-b);}
+function dayPickerHTML(jours,fn,disabled){
+  return `<div class="day-picker">${JOUR_LABELS.map((l,i)=>{
+    const j=i+1;return `<button class="day-btn ${jours.includes(j)?'on':''}" onclick="${fn}(${j})" ${disabled?'disabled':''}>${l}</button>`;
+  }).join('')}</div>`;
+}
+function volPeriodHTML(p,fn){
+  return `<div class="vol-period">${['jour','semaine','mois'].map(x=>
+    `<button class="${x===p?'on':''}" onclick="${fn}('${x}')">${x.charAt(0).toUpperCase()+x.slice(1)}</button>`).join('')}</div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CALCS — NOUVELLE LOGIQUE
+// ═══════════════════════════════════════════════════════════════
+// Capacité contractuelle de référence d'1 agent sur la période (base légale fixe)
+// 173,33h/mois · 40h/sem · 8h/jour — les shrinkages s'appliquent ensuite
+function capaAgentBase(period){
+  if(period==='jour')    return 8;      // base légale journalière
+  if(period==='semaine') return 40;     // base légale hebdomadaire
+  return HPM;                           // 173,33h/mois
+}
+// Conservé pour compatibilité ascendante (non utilisé dans les calcs principaux)
+function periodeMultiplicateur(period){
+  if(period==='jour') return 1;
+  if(period==='semaine') return 1;
+  return (52/12);
+}
+
+function calcBO(a){
+  const pe=txExt(),pi=txInt(),p=txProd();
+  const inter=Math.max(+(a.interactions)||1,1);
+  const dmtReel=a.dmt/inter;
+  const jours=[1,2,3,4,5]; // Lun-Ven fixe
+  const period=a.volPeriod||'mois';
+  const hPlage=heurePlage(a.hDebut??7,a.hFin??21);
+  const jm=joursParMois(jours);
+  const hj=+(a.hj)||8;
+  const vol=+(a.vol)||0;
+
+  // ─── Volume reste tel quel (volume à traiter sur la période) ───
+  const volPeriode=vol;
+
+  // ─── Heures productives nécessaires sur la période ───
+  const hp=volPeriode*dmtReel/3600;
+  const htrav=hp/pi;
+  const hpay=htrav/pe;
+
+  // ─── Capacité d'1 agent sur la période (Base contractuelle brute) ───
+  // Base légale fixe (173,33h/mois · 40h/sem · 8h/jour) — SANS shrinkage appliqué ici
+  // ETP (Noyaux durs) = htrav (besoin, déjà ÷pi) / Base brute
+  // Agents = ETP / pe — pe appliqué une seule fois, à cette étape
+  const nbJours = period==='jour' ? 1 : jours.length;
+  const capaAgent = capaAgentBase(period);
+  const etp_brut = capaAgent>0 ? htrav/capaAgent : 0;
+  const ag_brut = Math.ceil(etp_brut/pe); // /pe : seul taux appliqué, une seule fois
+
+  // ─── ERLANG (uniquement pour BO — concurrence temps réel) ───
+  // λ basé sur les heures d'ouverture totales sur la période
+  let hOuvPeriode;
+  if(period==='jour') hOuvPeriode = hPlage;
+  else if(period==='semaine') hOuvPeriode = hPlage * jours.length;
+  else hOuvPeriode = hPlage * jm;
+  const lam = hOuvPeriode>0 ? volPeriode/(hOuvPeriode*3600) : 0;
+  const A=lam*dmtReel;
+  const ae=erlangN(lam,dmtReel,a.ss,a.sp/100);
+  // etp_erlang : ae est en h.productives (agents simultanés) ; ÷pi pour ramener au même étage que etp_brut (h.travaillées/Base)
+  const etp_erlang=+(ae/pi).toFixed(2);
+  const ag_erlang=Math.ceil(ae/pe);
+  // ag_recrute : max entre besoin volumétrique et besoin Erlang (tous deux en ETP, même étage)
+  const ag_recrute = Math.ceil(Math.max(etp_brut, etp_erlang) / pe);
+
+  // ─── Actes traités par agent / par ETP — ramenés à jour / semaine / mois ───
+  // volPeriode est sur "period" ; on convertit vers les 3 échelles via jm (jours/mois) et 52/12 (sem/mois)
+  let volJour,volSem,volMois;
+  if(period==='jour'){ volJour=volPeriode; volSem=volPeriode*5; volMois=volPeriode*jm; }
+  else if(period==='semaine'){ volSem=volPeriode; volJour=volPeriode/5; volMois=volPeriode*(52/12); }
+  else { volMois=volPeriode; volSem=volPeriode/(52/12); volJour=volMois/jm; }
+  const actesParAgent={
+    jour: ag_recrute>0? +(volJour/ag_recrute).toFixed(1):0,
+    sem:  ag_recrute>0? +(volSem /ag_recrute).toFixed(1):0,
+    mois: ag_recrute>0? +(volMois/ag_recrute).toFixed(1):0
+  };
+  const actesParETP={
+    jour: etp_brut>0? +(volJour/etp_brut).toFixed(1):0,
+    sem:  etp_brut>0? +(volSem /etp_brut).toFixed(1):0,
+    mois: etp_brut>0? +(volMois/etp_brut).toFixed(1):0
+  };
+
+  return{
+    dmtReel,A:+A.toFixed(3),
+    hp:+hp.toFixed(2),htrav:+htrav.toFixed(2),hpay:+hpay.toFixed(2),
+    etp_brut:+etp_brut.toFixed(2),ag_brut,
+    ae,etp_erlang,ag_erlang,
+    ag_recrute,
+    actesParAgent,actesParETP,
+    capaAgent:+capaAgent.toFixed(2),
+    nbJours,jm:+jm.toFixed(1),hPlage,hOuvPeriode:+hOuvPeriode.toFixed(1),
+    period,
+    warnHj: period==='jour' && hPlage < 8
+  };
+}
+
+function calcAct(a){
+  const pe=txExt(),pi=txInt(),p=pe*pi;
+  const tent=Math.max(+(a.tentatives)||1,1);
+  const ta=(+a.ta||0)/100;
+  const jours=[1,2,3,4,5]; // Lun-Ven fixe
+  const period=a.volPeriod||'mois';
+  const hj=+(a.hj)||8;
+  const hPlage=heurePlage(a.hDebut??7,a.hFin??21);
+  const vol=+(a.vol)||0;
+
+  // ─── Tentatives : recyclage géométrique (base décroissante) ───
+  // Identique à calcSim type 'out' : à chaque passage, base = résidu injoignables
+  const ab_arr=[], nab_arr=[];
+  let base_r=vol;
+  for(let i=0;i<tent;i++){
+    const ab_i=base_r*ta;
+    ab_arr.push(ab_i);
+    nab_arr.push(base_r*(1-ta));
+    base_r=base_r*(1-ta);
+  }
+  const ab=ab_arr.reduce((s,x)=>s+x,0);
+  const nab_total=nab_arr.reduce((s,x)=>s+x,0);
+  const vol_total=ab+nab_total;
+
+  // ─── Charge productive ───
+  const hp=(ab*a.dma+nab_total*a.dmna)/3600;
+  const htrav=hp/pi;
+  const hpay=htrav/pe;
+
+  // ─── Capacité d'1 agent sur la période (Base contractuelle brute) ───
+  // Base légale fixe (173,33h/mois · 40h/sem · 8h/jour) — SANS shrinkage appliqué ici
+  // ETP (Noyaux durs) = htrav (besoin, déjà ÷pi) / Base brute
+  // Agents = ETP / pe — pe appliqué une seule fois, à cette étape
+  const nbJours = period==='jour' ? 1 : jours.length;
+  const capaAgent = capaAgentBase(period);
+  const etp = capaAgent>0 ? htrav/capaAgent : 0;
+  const ag = Math.ceil(etp/pe); // /pe : seul taux appliqué, une seule fois
+
+  const jm=joursParMois(jours);
+
+  // ─── Aboutis traités par agent / par ETP — ramenés à jour / semaine / mois ───
+  let abJour,abSem,abMois;
+  if(period==='jour'){ abJour=ab; abSem=ab*5; abMois=ab*jm; }
+  else if(period==='semaine'){ abSem=ab; abJour=ab/5; abMois=ab*(52/12); }
+  else { abMois=ab; abSem=ab/(52/12); abJour=abMois/jm; }
+  const actesParAgent={
+    jour: ag>0? +(abJour/ag).toFixed(1):0,
+    sem:  ag>0? +(abSem /ag).toFixed(1):0,
+    mois: ag>0? +(abMois/ag).toFixed(1):0
+  };
+  const actesParETP={
+    jour: etp>0? +(abJour/etp).toFixed(1):0,
+    sem:  etp>0? +(abSem /etp).toFixed(1):0,
+    mois: etp>0? +(abMois/etp).toFixed(1):0
+  };
+
+  return{
+    ab:Math.round(ab),
+    nab_total:Math.round(nab_total),
+    vol_total:Math.round(vol_total),
+    hp:+hp.toFixed(2),htrav:+htrav.toFixed(2),hpay:+hpay.toFixed(2),
+    etp:+etp.toFixed(2),ag,
+    actesParAgent,actesParETP,
+    capaAgent:+capaAgent.toFixed(2),
+    nbJours,jm:+jm.toFixed(1),hPlage,
+    period,
+    warnHj: period==='jour' && hPlage < 8
+  };
+}
+
+function calcSim(){
+  const sim=S.sim,pe=txExt(),pi=txInt();
+  let hp_needed,vol_aboutis=0,vol_total_appels=0;
+  const volM=+(sim.vol)||10000;
+  if(sim.type==='bo'){
+    const inter=Math.max(+(sim.interactions)||1,1);
+    hp_needed=volM*(sim.dmt/inter)/3600;
+    vol_aboutis=volM;
+    vol_total_appels=volM;
+  }else{
+    // Logique recyclages : chaque passage = ta% d'aboutis sur la base résiduelle
+    // tent = nombre total de passages (1er jet + recyclages)
+    const tent=Math.max(+(sim.tentatives)||1,1),ta=sim.ta/100;
+    let base=volM,cumAboutis=0,cumAppels=0;
+    for(let i=0;i<tent;i++){
+      const ab=base*ta;
+      cumAboutis+=ab;
+      cumAppels+=base;
+      base=base*(1-ta); // résidu = injoignables
+    }
+    vol_aboutis=cumAboutis;
+    vol_total_appels=cumAppels;
+    // H.prod = aboutis × dma + injoignables_totaux × dmna
+    // injoignables_totaux = total appels passés - aboutis
+    const vol_inj_total=cumAppels-cumAboutis;
+    hp_needed=(cumAboutis*sim.dma + vol_inj_total*sim.dmna)/3600;
+  }
+  const htrav_needed=hp_needed/pi,hpay_needed=htrav_needed/pe;
+  // Bases légales fixes : 173,33h/mois · 40h/sem · 8h/jour
+  const HPM_SEM=40;
+  const HPM_JOUR=8;
+  const hprod_mois=HPM*txProd(),hprod_sem=HPM_SEM*txProd(),hprod_jour=HPM_JOUR*txProd();
+  const dma_h=sim.dma/3600,dmt_bo=(sim.dmt/(Math.max(+(sim.interactions)||1,1)))/3600;
+  const capa_ab_mois=sim.type==='bo'?(dmt_bo>0?+(hprod_mois/dmt_bo).toFixed(1):null):(dma_h>0?+(hprod_mois/dma_h).toFixed(1):null);
+  const capa_ab_sem =sim.type==='bo'?(dmt_bo>0?+(hprod_sem/dmt_bo).toFixed(1):null) :(dma_h>0?+(hprod_sem/dma_h).toFixed(1):null);
+  const capa_ab_jour=sim.type==='bo'?(dmt_bo>0?+(hprod_jour/dmt_bo).toFixed(1):null):(dma_h>0?+(hprod_jour/dma_h).toFixed(1):null);
+  let capa_tot_mois=null,capa_tot_sem=null,capa_tot_jour=null;
+  if(sim.type==='out'&&vol_aboutis>0&&hp_needed>0){
+    // capa total = h productives dispo / (hp_needed / vol_total_appels)
+    const hp_par_appel=hp_needed/vol_total_appels;
+    const hp_par_abouti=hp_needed/vol_aboutis;
+    capa_ab_mois!=null&&(capa_tot_mois=+(hprod_mois/hp_par_appel).toFixed(1));
+    capa_ab_sem !=null&&(capa_tot_sem =+(hprod_sem /hp_par_appel).toFixed(1));
+    capa_ab_jour!=null&&(capa_tot_jour=+(hprod_jour/hp_par_appel).toFixed(1));
+  }
+  // ─── Tables simulation ───
+  // ETP (Noyaux durs) = htrav_needed / Base brute — bases : 173,33h/mois · 40h/sem · 8h/jour
+  // ag  = ceil(etp / pe) — pe appliqué une seule fois, à cette étape
+  // Actes/agent et Actes/ETP : volume traité (vol_aboutis) réparti sur n mois/semaines/jours
+  const rowsMois=[],rowsSem=[],rowsJour=[],rowsETP=[];
+  for(let n=1;n<=31;n++){
+    const etp_n = +(htrav_needed/(HPM*n)).toFixed(2);
+    const ag_n = Math.ceil(etp_n/pe);
+    const vol_n = vol_aboutis/n;
+    rowsMois.push({n,unit:'mois',etp:etp_n,ag:ag_n,
+      actesParAgent: ag_n>0? +(vol_n/ag_n).toFixed(1):0,
+      actesParETP: etp_n>0? +(vol_n/etp_n).toFixed(1):0});
+  }
+  for(let n=1;n<=31;n++){
+    const etp_n = +(htrav_needed/(HPM_SEM*n)).toFixed(2);
+    const ag_n = Math.ceil(etp_n/pe);
+    const vol_n = vol_aboutis/n;
+    rowsSem.push({n,unit:'sem.',etp:etp_n,ag:ag_n,
+      actesParAgent: ag_n>0? +(vol_n/ag_n).toFixed(1):0,
+      actesParETP: etp_n>0? +(vol_n/etp_n).toFixed(1):0});
+  }
+  for(let n=1;n<=31;n++){
+    const etp_n = +(htrav_needed/(HPM_JOUR*n)).toFixed(2);
+    const ag_n = Math.ceil(etp_n/pe);
+    const vol_n = vol_aboutis/n;
+    rowsJour.push({n,unit:'jours',etp:etp_n,ag:ag_n,
+      actesParAgent: ag_n>0? +(vol_n/ag_n).toFixed(1):0,
+      actesParETP: etp_n>0? +(vol_n/etp_n).toFixed(1):0});
+  }
+  // rowsETP : pour e ETP fixé (entier), durée nécessaire (mois/sem/jour) + mêmes métriques (ag, actes/ag, actes/ETP)
+  // calculées pour cet ETP exact, cohérent avec les colonnes de rowsMois/Sem/Jour
+  for(let e=1;e<=31;e++){
+    const dMois=htrav_needed/(HPM*e), dSem=htrav_needed/(HPM_SEM*e), dJour=htrav_needed/(HPM_JOUR*e);
+    const ag_e=Math.ceil(e/pe);
+    rowsETP.push({e,
+      mois:+dMois.toFixed(2),sem:+dSem.toFixed(1),jour:Math.ceil(dJour),
+      ag:ag_e,
+      actesParAgent: ag_e>0? +(vol_aboutis/ag_e).toFixed(1):0,
+      actesParETP: +(vol_aboutis/e).toFixed(1)});
+  }
+  return{hp_needed:+hp_needed.toFixed(2),htrav_needed:+htrav_needed.toFixed(2),hpay_needed:+hpay_needed.toFixed(2),
+    vol_aboutis:Math.round(vol_aboutis),vol_total_appels:Math.round(vol_total_appels),
+    capa_ab_mois,capa_ab_sem,capa_ab_jour,capa_tot_mois,capa_tot_sem,capa_tot_jour,
+    rowsMois,rowsSem,rowsJour,rowsETP};
+}
+
+// ═══════════════════════════════════════════════════════════════
+// VALIDATION
+// ═══════════════════════════════════════════════════════════════
+function validateBO(a){
+  const e={};
+  if(!a.vol||a.vol<=0)e.vol='Volume > 0';
+  if(!a.dmt||a.dmt<=0)e.dmt='DMT > 0';
+  if(!a.hj||a.hj<=0)e.hj='H/jour > 0';
+  if(!a.jours||!a.jours.length)e.jours='Au moins 1 jour';
+  if(a.sp<1||a.sp>100)e.sp='SL 1–100%';
+  if(a.ss<=0)e.ss='SL objectif > 0';
+  return e;
+}
+function validateOUT(a){
+  const e={};
+  if(!a.vol||a.vol<=0)e.vol='Volume > 0';
+  if(a.ta<0||a.ta>100)e.ta='Taux 0–100%';
+  if(!a.dma||a.dma<=0)e.dma='DMT aboutis > 0';
+  if(a.dmna<0)e.dmna='DMT non aboutis ≥ 0';
+  if(!a.hj||a.hj<=0)e.hj='H/jour > 0';
+  if((a.volPeriod||'mois')!=='jour' && (!a.jours||!a.jours.length))e.jours='Au moins 1 jour';
+  return e;
+}
+const hasErrors=e=>Object.keys(e).length>0;
+
+// ═══════════════════════════════════════════════════════════════
+// UI BUILDERS
+// ═══════════════════════════════════════════════════════════════
+const tip=t=>t?`<span class="tip" data-tip="${t.replace(/"/g,'&quot;')}">?</span>`:'';
+const editBadge=()=>`<span class="fld-badge edit" title="Champ modifiable"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></span>`;
+const lockBadge=()=>`<span class="fld-badge lock" title="Valeur fixe / calculée"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 1 1 8 0v4"/></svg></span>`;
+const guidePopover=(id)=>`
+  <div style="position:relative;display:inline-block">
+    <button class="help-ico" onclick="toggleGuide('${id}')" type="button">?</button>
+    <div class="help-pop" id="guide-${id}">
+      <h4>🧭 Comment utiliser cette page</h4>
+      <div class="help-pop-row">${editBadge()}<span class="txt">Champs que vous pouvez modifier librement (nom, volume, DMT, taux…).</span></div>
+      <div class="help-pop-row">${lockBadge()}<span class="txt">Valeurs fixes, calculées automatiquement à partir des shrinkages globaux — non modifiables ici.</span></div>
+      <div class="help-pop-row">${lockBadge()}<span class="txt">Les cartes de résultats (ETP, Agents…) sont aussi calculées automatiquement.</span></div>
+    </div>
+  </div>`;
+window.toggleGuide=(id)=>{
+  document.querySelectorAll('.help-pop').forEach(p=>{if(p.id!=='guide-'+id)p.classList.remove('open');});
+  document.getElementById('guide-'+id)?.classList.toggle('open');
+};
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.help-ico')&&!e.target.closest('.help-pop')){
+    document.querySelectorAll('.help-pop.open').forEach(p=>p.classList.remove('open'));
+  }
+});
+const fieldWrap=(errs,key,inner,hint='')=>`<div class="field${errs[key]?' field-error':''}">${inner}${hint?`<div class="field-hint">${hint}</div>`:''}${errs[key]?`<div class="field-err-msg">⚠ ${errs[key]}</div>`:''}</div>`;
+const cmt=(obj,tgFn,inFn)=>`
+  <div class="cmt-toggle" onclick="${tgFn}">
+    <span>${obj.showComment?'▾':'▸'}</span>
+    <span>${obj.commentaire?'💬 '+obj.commentaire.substring(0,40)+(obj.commentaire.length>40?'…':''):'Ajouter un commentaire'}</span>
+  </div>
+  ${obj.showComment?`<div style="margin-top:8px"><textarea onblur="${inFn}" placeholder="Commentaire, hypothèses…">${obj.commentaire||''}</textarea></div>`:''}`;
+
+const periodLabel=p=>p==='jour'?'la journée':p==='semaine'?'la semaine':'le mois';
+
+// ═══════════════════════════════════════════════════════════════
+// RIGHT SIDEBAR
+// ═══════════════════════════════════════════════════════════════
+
+function getSHDetail(hTrav){
+  const ht=+hTrav.toFixed(1);
+  return {
+    cg:{
+      court:`25 j/an × 8h = 16,7h/mois ÷ 173,33`,
+      long:`<b>Congés payés & fériés</b><br>
+2 jours/mois + 1 jour en décembre = <b>25 j/an</b><br>
+25 × 8h = <b>200h/an</b> → 200 ÷ 12 = <b>16,7h/mois</b><br>
+16,7 ÷ 173,33 = <b>9,62%</b>`
+    },
+    to:{
+      court:'% de départs',
+      long:`<b>Turn Over</b><br>% de départs.<br><i>Ex : 10% = 1 agent sur 10 quitte en cours d'année</i>`
+    },
+    ab:{
+      court:'Absences imprévues',
+      long:`<b>Absentéisme</b><br>Repos maladie, permission...`
+    },
+    fo:{
+      court:`3h/mois ÷ ${ht}h = ${(3/ht*100).toFixed(1)}%`,
+      long:`<b>Formation continue</b><br>
+3h/mois ÷ <b>${ht}h travaillées</b> = <b>${(3/ht*100).toFixed(1)}%</b>`
+    },
+    nc:{
+      court:`3,14h/mois ÷ ${ht}h = ${(3.14/ht*100).toFixed(1)}%`,
+      long:`<b>NCMS — activités managériales mensuelles</b><br>
+<table style="width:100%;font-size:10px;border-collapse:collapse;margin:6px 0">
+<tr style="color:var(--muted);border-bottom:1px solid var(--border)"><th style="text-align:left;padding:4px 6px 4px 0">Activité</th><th style="text-align:center;padding:4px 8px">Qté</th><th style="text-align:center;padding:4px 8px">Durée</th><th style="text-align:right;padding:4px 0;white-space:nowrap">Total</th></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:4px 6px 4px 0;white-space:nowrap">Individual Coaching</td><td style="text-align:center;padding:4px 8px">4</td><td style="text-align:center;padding:4px 8px;white-space:nowrap">20 min</td><td style="text-align:right;padding:4px 0;white-space:nowrap">80 min</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:4px 6px 4px 0;white-space:nowrap">Brief</td><td style="text-align:center;padding:4px 8px">4,33</td><td style="text-align:center;padding:4px 8px;white-space:nowrap">10 min</td><td style="text-align:right;padding:4px 0;white-space:nowrap">43,3 min</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:4px 6px 4px 0;white-space:nowrap">Debrief / Paralleling</td><td style="text-align:center;padding:4px 8px">4</td><td style="text-align:center;padding:4px 8px;white-space:nowrap">10 min</td><td style="text-align:right;padding:4px 0;white-space:nowrap">40 min</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:4px 6px 4px 0;white-space:nowrap">Calibrage mensuel</td><td style="text-align:center;padding:4px 8px">1</td><td style="text-align:center;padding:4px 8px;white-space:nowrap">10 min</td><td style="text-align:right;padding:4px 0;white-space:nowrap">10 min</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:4px 6px 4px 0;white-space:nowrap">Team Meeting</td><td style="text-align:center;padding:4px 8px">1</td><td style="text-align:center;padding:4px 8px;white-space:nowrap">15 min</td><td style="text-align:right;padding:4px 0;white-space:nowrap">15 min</td></tr>
+<tr style="font-weight:600"><td colspan="4" style="text-align:right;padding:5px 0;white-space:nowrap">Total &nbsp; 188,3 min = <b>3,14h/mois</b></td></tr>
+</table>
+3,14h ÷ <b>${ht}h travaillées</b> = <b>${(3.14/ht*100).toFixed(1)}%</b>`
+    },
+    pa:{
+      court:`(5×7×5×4,33)÷60 = 12,63h ÷ ${ht}h = ${(12.63/ht*100).toFixed(1)}%`,
+      long:`<b>Pauses réglementaires</b><br>
+5 min par heure × 7h × 5j/sem × 4,33 sem/mois<br>
+= (5 × 7 × 5 × 4,33) ÷ 60 = <b>12,63h/mois</b><br>
+12,63 ÷ <b>${ht}h travaillées</b> = <b>${(12.63/ht*100).toFixed(1)}%</b>`
+    },
+    np:{
+      court:'Admin, réunions, divers…',
+      long:`<b>Heures non productives diverses</b><br>Tâches administratives, réunions, divers…`
+    }
+  };
+}
+
+function shDetail(id, hTrav){
+  const d=getSHDetail(hTrav||HPM)[id];
+  if(!d)return '';
+  return `<details style="margin-top:4px"><summary style="font-size:10px;color:var(--muted);cursor:pointer;list-style:none;display:flex;align-items:center;gap:4px"><span style="font-size:9px">▸</span>${d.court}</summary><div style="font-size:10px;color:var(--text2);line-height:1.7;background:var(--bg2);border-radius:6px;padding:8px 10px;margin-top:5px">${d.long}</div></details>`;
+}
+
+function renderRSidebar(){
+  const body=document.getElementById('rsb-body');
+  const sub=document.getElementById('rsb-sub');
+  if(!body)return;
+  const modified=shrinkagesModified();
+  if(sub)sub.textContent=modified?'⚠ Valeurs personnalisées':'Référentiel global appliqué';
+
+  const hBase=HPM;
+  const shExtTotal=S.shExtUser.reduce((a,x)=>a+(+x.v||0)/100,0);
+  const shIntTotal=S.shIntUser.reduce((a,x)=>a+(+x.v||0)/100,0);
+  const hTrav=+(hBase*(1-shExtTotal)).toFixed(1);
+  const hProd=+(hTrav*(1-shIntTotal)).toFixed(1);
+
+  const cumBadge=(h)=>`<span style="margin-left:auto;margin-right:18px;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;color:var(--text);white-space:nowrap;background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:3px 9px">${f1(h)}&thinsp;h</span>`;
+
+  body.innerHTML=`
+  <div style="margin-bottom:18px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text2)">Shrinkages</div>
+      ${modified?`<button class="btn btn-outline btn-sm" onclick="resetShrinkagesToGlobal()" style="padding:3px 8px;font-size:10px">↺ Réinitialiser</button>`:''}
+    </div>
+    ${modified?`<div class="shr-banner warn"><span>⚠</span><span>Valeurs locales (session uniquement).</span></div>`:`<div class="shr-banner"><span>✓</span><span>Référentiel global appliqué.</span></div>`}
+
+    <!-- EXTERNES -->
+    <div style="margin-bottom:14px">
+      <div style="font-size:10px;font-weight:600;color:var(--red);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;display:flex;align-items:center">
+        Externes — H.payées → H.travaillées
+        ${cumBadge(hTrav)}
+      </div>
+      ${S.shExtUser.map(s=>`
+        <div style="padding:6px 0;border-bottom:1px solid var(--border)">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="sh-name">${s.n}</div>
+            <input class="sh-inp" type="number" min="0" max="50" step="0.1" value="${s.v}" onchange="uSEuser('${s.id}',this.value)">
+            <span style="font-size:10px;color:var(--muted);width:10px">%</span>
+          </div>
+          ${shDetail(s.id, HPM)}
+        </div>`).join('')}
+    </div>
+
+    <!-- INTERNES -->
+    <div style="margin-bottom:14px">
+      <div style="font-size:10px;font-weight:600;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;display:flex;align-items:center">
+        Internes — H.trav. → H.productives
+        ${cumBadge(hProd)}
+      </div>
+      ${S.shIntUser.map(s=>`
+        <div style="padding:6px 0;border-bottom:1px solid var(--border)">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="sh-name">${s.n}</div>
+            <input class="sh-inp" type="number" min="0" max="50" step="0.1" value="${s.v}" onchange="uSIuser('${s.id}',this.value)">
+            <span style="font-size:10px;color:var(--muted);width:10px">%</span>
+          </div>
+          ${shDetail(s.id, hTrav)}
+        </div>`).join('')}
+    </div>
+
+    <div class="taux-row">
+      <div class="taux-chip">Prés. ext <b>${pct(txExt())}</b></div>
+      <div class="taux-chip">Prés. int <b>${pct(txInt())}</b></div>
+      <div class="taux-chip">Productif <b>${pct(txProd())}</b></div>
+    </div>
+  </div>
+
+  <div class="fbox">
+    <div class="formule-title">Capacité agent</div>
+    <b>Jour</b> = 8h<br>
+    <b>Semaine</b> = 40h<br>
+    <b>Mois</b> = 173,33<br>
+
+    <div class="formule-title">Charge productive</div>
+    <b>Back Office</b><br>
+    H.prod = Volume × (DMT/Interactions) / 3600
+    <br><br>
+    <b>Sortants</b><br>
+    H.prod = (Aboutis × DMT_ab + Non Aboutis × DMT_nab) / 3600<br>
+
+    <div class="formule-title">Conversion ETP</div>
+    H.travaillées = H.prod ÷ ${pct(txInt())}<br>
+    H.payées = H.trav ÷ ${pct(txExt())}<br>
+    <b>ETP</b> (Noyaux durs) = H.travaillées ÷ Base contractuelle<br>
+    <b>Agents</b> = ⌈ETP ÷ ${pct(txExt())}⌉
+
+    <div class="formule-title">Back Office (Erlang-C)</div>
+    λ = Volume ÷ (H.ouverture × 3600)<br>
+    A = λ × DMT réelle<br>
+    Agents simultanés = N tel que SL ≥ cible
+  </div>`;
+}
+
+function resetShrinkagesToGlobal(silent){
+  S.shExtUser=JSON.parse(JSON.stringify(S.shExtGlobal));
+  S.shIntUser=JSON.parse(JSON.stringify(S.shIntGlobal));
+  saveState();
+  if(!silent)toast('Shrinkages réinitialisés');
+  R();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// NAV
+// ═══════════════════════════════════════════════════════════════
+let _tab='dash';
+function gotoTab(tab){
+  _tab=tab;
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
+  R();
+}
+function gotoAdmin(){_tab='admin';document.querySelectorAll('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.tab==='admin'));R();}
+function R(){
+  if(!checkAuth())return;
+  const el=document.getElementById('main-content');if(!el)return;
+  if(_tab==='dash') el.innerHTML=rDASH();
+  else if(_tab==='bo') el.innerHTML=rBO();
+  else if(_tab==='out') el.innerHTML=rOUT();
+  else if(_tab==='sim') el.innerHTML=rSIM();
+  else if(_tab==='sh') el.innerHTML=rSH();
+  else if(_tab==='cmp') el.innerHTML=rCMP();
+  else if(_tab==='admin') el.innerHTML=rADMIN();
+  renderRSidebar();renderHist();saveState();scheduleAutoPush();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
+// DASHBOARD ENRICHI
+// ═══════════════════════════════════════════════════════════════
+const DASH={
+  filter:'all',      // all | bo | out | sim
+  search:'',
+  sort:'recent',     // recent | old | etpAsc | etpDesc | alpha
+  author:'all',
+  selected:new Set(),
+  page:1,
+  pageSize:10
+};
+
+function extractEtp(meta){
+  const m=(meta||'').match(/([\d\s,.]+)\s*ETP/i);
+  return m?parseFloat(m[1].replace(/\s/g,'').replace(',','.'))||0:0;
+}
+function extractAg(meta){
+  const m=(meta||'').match(/([\d\s,.]+)\s*ag/i);
+  return m?parseInt(m[1].replace(/\s/g,''))||0:0;
+}
+
+function filterAndSortSims(){
+  let list = visibleSims();   // ← changement clé : on part de visibleSims() au lieu de S.sims
+  if(DASH.filter!=='all') list=list.filter(s=>s.type===DASH.filter);
+  if(DASH.author!=='all') list=list.filter(s=>(s.modifiedBy||'')===DASH.author);
+  if(DASH.search){
+    const q=DASH.search.toLowerCase();
+    list=list.filter(s=>(s.nm||'').toLowerCase().includes(q)||(s.commentaire||'').toLowerCase().includes(q)||(s.meta||'').toLowerCase().includes(q));
+  }
+  switch(DASH.sort){
+    case 'old':     list.sort((a,b)=>(a.modifiedAt||'').localeCompare(b.modifiedAt||''));break;
+    case 'etpAsc':  list.sort((a,b)=>extractEtp(a.meta)-extractEtp(b.meta));break;
+    case 'etpDesc': list.sort((a,b)=>extractEtp(b.meta)-extractEtp(a.meta));break;
+    case 'alpha':   list.sort((a,b)=>(a.nm||'').localeCompare(b.nm||''));break;
+    default:        list.sort((a,b)=>(b.modifiedAt||'').localeCompare(a.modifiedAt||''));
+  }
+  return list;
+}
+
+function trendBadge(thisWeek, lastWeek){
+  if(thisWeek===0 && lastWeek===0) return '';
+  if(lastWeek===0) return `<span class="kpi-trend up">+${thisWeek}</span>`;
+  const diff=thisWeek-lastWeek;
+  if(diff>0) return `<span class="kpi-trend up">↑ +${diff}</span>`;
+  if(diff<0) return `<span class="kpi-trend down">↓ ${diff}</span>`;
+  return `<span class="kpi-trend flat">=</span>`;
+}
+
+function countByPeriod(){
+  const now=Date.now();
+  const week=7*24*3600*1000;
+  let thisWeek=0,lastWeek=0;
+  S.sims.forEach(s=>{
+    const t=s.modifiedAt?new Date(s.modifiedAt).getTime():0;
+    if(!t)return;
+    const age=now-t;
+    if(age<week) thisWeek++;
+    else if(age<2*week) lastWeek++;
+  });
+  return {thisWeek,lastWeek};
+}
+
+function donutSVG(bos,outs,sims){
+  const total=bos+outs+sims;
+  if(total===0) return `<svg class="donut-svg" viewBox="0 0 42 42"><circle cx="21" cy="21" r="15.9" fill="none" stroke="var(--border)" stroke-width="3"/></svg>`;
+  const r=15.9, c=2*Math.PI*r;
+  const pBo=bos/total, pOut=outs/total, pSim=sims/total;
+  const lBo=pBo*c, lOut=pOut*c, lSim=pSim*c;
+  let off1=0, off2=lBo, off3=lBo+lOut;
+  return `<svg class="donut-svg" viewBox="0 0 42 42">
+    <circle cx="21" cy="21" r="${r}" fill="none" stroke="var(--border)" stroke-width="3"/>
+    ${bos>0?`<circle cx="21" cy="21" r="${r}" fill="none" stroke="var(--amber-dot)" stroke-width="3" stroke-dasharray="${lBo} ${c-lBo}" stroke-dashoffset="${-off1}" transform="rotate(-90 21 21)"/>`:''}
+    ${outs>0?`<circle cx="21" cy="21" r="${r}" fill="none" stroke="var(--green-dot)" stroke-width="3" stroke-dasharray="${lOut} ${c-lOut}" stroke-dashoffset="${-off2}" transform="rotate(-90 21 21)"/>`:''}
+    ${sims>0?`<circle cx="21" cy="21" r="${r}" fill="none" stroke="var(--purple-dot)" stroke-width="3" stroke-dasharray="${lSim} ${c-lSim}" stroke-dashoffset="${-off3}" transform="rotate(-90 21 21)"/>`:''}
+    <text x="21" y="23" text-anchor="middle" font-size="6" font-weight="700" fill="var(--text)" font-family="JetBrains Mono">${total}</text>
+  </svg>`;
+}
+
+function rDASH(){
+  const mySims = visibleSims();
+  const total=mySims.length;
+  const bos=mySims.filter(s=>s.type==='bo');
+  const outs=mySims.filter(s=>s.type==='out');
+  const sims=mySims.filter(s=>s.type==='sim');
+
+  const etpTotal=mySims.reduce((a,s)=>a+extractEtp(s.meta),0);
+  const agTotal=mySims.reduce((a,s)=>a+extractAg(s.meta),0);
+
+  const trend=countByPeriod();
+  const trendHtml=trendBadge(trend.thisWeek,trend.lastWeek);
+
+  const list=filterAndSortSims();
+
+  // Reset page if filter changed puts us out of range
+  const totalPages=Math.max(1,Math.ceil(list.length/DASH.pageSize));
+  if(DASH.page>totalPages) DASH.page=totalPages;
+  const pageStart=(DASH.page-1)*DASH.pageSize;
+  const pageEnd=Math.min(pageStart+DASH.pageSize,list.length);
+  const pageList=list.slice(pageStart,pageEnd);
+
+  const authors = S.user?.role==='admin'
+    ? [...new Set(S.sims.map(s=>s.modifiedBy).filter(Boolean))]
+    : [];
+
+  // Pagination buttons (max 7 visible)
+  function pgBtns(){
+    if(totalPages<=1) return '';
+    let btns='';
+    const prev=`<button class="pg-btn" onclick="DASH.page=Math.max(1,DASH.page-1);R()" ${DASH.page===1?'disabled':''}>‹</button>`;
+    const next=`<button class="pg-btn" onclick="DASH.page=Math.min(${totalPages},DASH.page+1);R()" ${DASH.page===totalPages?'disabled':''}>›</button>`;
+    btns+=prev;
+    // Show pages: always 1, always last, current ±1, ellipsis
+    const pages=new Set([1,totalPages,DASH.page,DASH.page-1,DASH.page+1].filter(p=>p>=1&&p<=totalPages));
+    const sorted=[...pages].sort((a,b)=>a-b);
+    let prev2=0;
+    for(const p of sorted){
+      if(p-prev2>1) btns+=`<span style="padding:0 4px;color:var(--muted);font-size:12px">…</span>`;
+      btns+=`<button class="pg-btn ${p===DASH.page?'active':''}" onclick="DASH.page=${p};R()">${p}</button>`;
+      prev2=p;
+    }
+    btns+=next;
+    return btns;
+  }
+
+  return `
+<div class="page-header">
+  <div>
+    <div class="page-title">Tableau de bord</div>
+    <div class="page-sub">
+      Bienvenue ${S.user?.displayName||''} —
+      ${total} scénario${total>1?'s':''}
+      ${S.user?.role==='admin'
+        ? '<span style="background:var(--purple-bg);color:var(--purple);padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;margin-left:6px">👁 Vue admin</span>'
+        : '<span style="background:var(--blue-bg);color:var(--blue);padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;margin-left:6px">Mes scénarios</span>'
+      }
+      ${trendHtml}
+    </div>
+  </div>
+  <div class="page-actions">
+    <button class="btn btn-outline btn-sm" onclick="exportCSV()" ${total===0?'disabled style="opacity:.5"':''}>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Exporter CSV
+    </button>
+    <button class="btn btn-dark" onclick="openModalNew()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Nouveau dimensionnement
+    </button>
+  </div>
+</div>
+
+<!-- KPI STRIP + DONUT -->
+<div class="dash-top">
+  <div class="kpi-strip">
+    <div class="kpi-strip-item" style="--c:var(--accent)">
+      <div class="kpi-strip-lbl">Total scénarios</div>
+      <div class="kpi-strip-val">${total}</div>
+      <div class="kpi-strip-sub">${trend.thisWeek} cette semaine</div>
+    </div>
+    <div class="kpi-strip-item" style="--c:var(--amber-dot)">
+      <div class="kpi-strip-lbl">Back Office</div>
+      <div class="kpi-strip-val" style="color:var(--amber)">${bos.length}</div>
+      <div class="kpi-strip-sub">${f1(bos.reduce((a,s)=>a+extractEtp(s.meta),0))} ETP cumulés</div>
+    </div>
+    <div class="kpi-strip-item" style="--c:var(--green-dot)">
+      <div class="kpi-strip-lbl">Sortants</div>
+      <div class="kpi-strip-val" style="color:var(--green)">${outs.length}</div>
+      <div class="kpi-strip-sub">${f1(outs.reduce((a,s)=>a+extractEtp(s.meta),0))} ETP cumulés</div>
+    </div>
+    <div class="kpi-strip-item" style="--c:var(--purple-dot)">
+      <div class="kpi-strip-lbl">Simulations</div>
+      <div class="kpi-strip-val" style="color:var(--purple)">${sims.length}</div>
+      <div class="kpi-strip-sub">prévisionnels</div>
+    </div>
+    <div class="kpi-strip-item" style="--c:var(--blue-dot)">
+      <div class="kpi-strip-lbl">ETP total</div>
+      <div class="kpi-strip-val" style="color:var(--blue)">${f1(etpTotal)}</div>
+      <div class="kpi-strip-sub">tous types confondus</div>
+    </div>
+    <div class="kpi-strip-item" style="--c:var(--red-dot)">
+      <div class="kpi-strip-lbl">Agents à recruter</div>
+      <div class="kpi-strip-val" style="color:var(--red)">${agTotal}</div>
+      <div class="kpi-strip-sub">cumul effectif</div>
+    </div>
+  </div>
+  <div class="donut-card">
+    <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:10px">Répartition</div>
+    <div class="donut-wrap">
+      ${donutSVG(bos.length,outs.length,sims.length)}
+      <div class="donut-legend">
+        <div class="donut-leg-row"><div class="donut-leg-dot" style="background:var(--amber-dot)"></div><span class="donut-leg-lbl">Back Office</span><span class="donut-leg-val">${bos.length}</span></div>
+        <div class="donut-leg-row"><div class="donut-leg-dot" style="background:var(--green-dot)"></div><span class="donut-leg-lbl">Sortants</span><span class="donut-leg-val">${outs.length}</span></div>
+        <div class="donut-leg-row"><div class="donut-leg-dot" style="background:var(--purple-dot)"></div><span class="donut-leg-lbl">Simulations</span><span class="donut-leg-val">${sims.length}</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+${total===0?`
+<div class="empty-state">
+  <div class="empty-icon">📋</div>
+  <div class="empty-title">Aucun scénario enregistré</div>
+  <div class="empty-sub">Démarrez votre premier dimensionnement pour calculer vos besoins en ETP et agents.</div>
+  <div class="empty-actions">
+    <button class="btn btn-dark" onclick="newDim('bo')">📄 Back Office</button>
+    <button class="btn btn-dark" onclick="newDim('out')">📞 Sortants</button>
+    <button class="btn btn-dark" onclick="newDim('sim')">📊 Simulation</button>
+  </div>
+</div>
+`:`
+
+<!-- Toolbar -->
+<div class="dash-toolbar">
+  <div class="search-box">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" placeholder="Rechercher un scénario, commentaire…" value="${DASH.search}" oninput="DASH.search=this.value;DASH.page=1;R()">
+  </div>
+  <div class="filter-chips">
+    <button class="filter-chip ${DASH.filter==='all'?'active':''}" onclick="DASH.filter='all';DASH.page=1;R()">Tous (${total})</button>
+    <button class="filter-chip ${DASH.filter==='bo'?'active':''}" onclick="DASH.filter='bo';DASH.page=1;R()">Back Office (${bos.length})</button>
+    <button class="filter-chip ${DASH.filter==='out'?'active':''}" onclick="DASH.filter='out';DASH.page=1;R()">Sortants (${outs.length})</button>
+    <button class="filter-chip ${DASH.filter==='sim'?'active':''}" onclick="DASH.filter='sim';DASH.page=1;R()">Simulations (${sims.length})</button>
+  </div>
+  ${authors.length>1?`<select class="sort-select" onchange="DASH.author=this.value;DASH.page=1;R()">
+    <option value="all">Tous les auteurs</option>
+    ${authors.map(a=>`<option value="${a}" ${DASH.author===a?'selected':''}>${a}</option>`).join('')}
+  </select>`:''}
+  <select class="sort-select" onchange="DASH.sort=this.value;DASH.page=1;R()">
+    <option value="recent" ${DASH.sort==='recent'?'selected':''}>Plus récent</option>
+    <option value="old" ${DASH.sort==='old'?'selected':''}>Plus ancien</option>
+    <option value="etpDesc" ${DASH.sort==='etpDesc'?'selected':''}>ETP ↓</option>
+    <option value="etpAsc" ${DASH.sort==='etpAsc'?'selected':''}>ETP ↑</option>
+    <option value="alpha" ${DASH.sort==='alpha'?'selected':''}>A → Z</option>
+  </select>
+</div>
+
+<!-- Tableau scénarios -->
+${list.length===0?`<div class="empty-state">
+  <div class="empty-icon">🔍</div>
+  <div class="empty-title">Aucun résultat</div>
+  <div class="empty-sub">Aucun scénario ne correspond à vos filtres. Essayez d'élargir la recherche.</div>
+  <div class="empty-actions"><button class="btn btn-outline" onclick="DASH.search='';DASH.filter='all';DASH.author='all';DASH.page=1;R()">Réinitialiser les filtres</button></div>
+</div>`:`
+<table class="scenario-table">
+  <thead><tr>
+    <th style="width:30px"><input type="checkbox" class="checkbox" onchange="toggleSelectAll(this.checked)" ${DASH.selected.size===list.length&&list.length>0?'checked':''}></th>
+    <th>Type</th><th>Nom</th><th>Résumé</th><th>ETP</th><th>Agents</th><th>Auteur</th><th>Date</th>
+    <th style="text-align:right">Actions</th>
+  </tr></thead>
+  <tbody>
+  ${pageList.map(s=>{
+    const etp=extractEtp(s.meta), ag=extractAg(s.meta);
+    const isSelected=DASH.selected.has(s.id);
+    return `<tr class="${isSelected?'selected':''}" onclick="editSim(${s.id})">
+      <td onclick="event.stopPropagation()"><input type="checkbox" class="checkbox" ${isSelected?'checked':''} onchange="toggleSelect(${s.id},this.checked)"></td>
+      <td><span class="scenario-badge ${s.type}">${s.type==='bo'?'Back Office':s.type==='out'?'Sortants':'Simulation'}</span></td>
+      <td><b>${(s.nm||'').replace(/</g,'&lt;')}</b></td>
+      <td style="color:var(--muted);font-size:11px">${s.meta||''}</td>
+      <td style="font-family:'JetBrains Mono',monospace;color:var(--green);font-weight:600">${etp?f2(etp):'—'}</td>
+      <td style="font-family:'JetBrains Mono',monospace;color:var(--amber);font-weight:600">${ag||'—'}</td>
+      <td style="color:var(--text2)">${s.modifiedBy||'—'}</td>
+      <td style="color:var(--muted);font-size:11px">${fmtDate(s.date)}</td>
+      <td style="text-align:right" onclick="event.stopPropagation()">
+        <button class="hi-btn" onclick="editSim(${s.id})" title="Modifier">✎</button>
+        <button class="hi-btn" onclick="dupSim(${s.id})" title="Dupliquer">⧉</button>
+        <button class="hi-btn" onclick="xSim(${s.id})" style="color:var(--red)" title="Supprimer">✕</button>
+      </td>
+    </tr>`;
+  }).join('')}
+  </tbody>
+</table>
+<div class="dash-pagination">
+  <span class="pg-info">${list.length===0?'Aucun scénario':`${pageStart+1}–${pageEnd} sur ${list.length} scénario${list.length>1?'s':''}`}</span>
+  <div class="pg-btns">${pgBtns()}</div>
+</div>
+`}
+`}
+
+<!-- Barre d'actions groupées -->
+<div class="bulk-bar ${DASH.selected.size>0?'show':''}" id="bulk-bar">
+  <span class="bulk-bar-count">${DASH.selected.size} sélectionné${DASH.selected.size>1?'s':''}</span>
+  <button class="bulk-bar-btn" onclick="openCompareModal()" ${DASH.selected.size<2?'disabled style="opacity:.4"':''}>📊 Comparer</button>
+  <button class="bulk-bar-btn" onclick="bulkDuplicate()">⧉ Dupliquer</button>
+  <button class="bulk-bar-btn danger" onclick="bulkDelete()">✕ Supprimer</button>
+  <button class="bulk-bar-btn" onclick="DASH.selected.clear();R()">Annuler</button>
+</div>
+`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SELECTION / BULK ACTIONS
+// ═══════════════════════════════════════════════════════════════
+window.toggleSelect=(id,checked)=>{
+  if(checked) DASH.selected.add(id);
+  else DASH.selected.delete(id);
+  R();
+};
+window.toggleSelectAll=(checked)=>{
+  if(checked) filterAndSortSims().forEach(s=>DASH.selected.add(s.id));
+  else DASH.selected.clear();
+  R();
+};
+window.bulkDelete=()=>{
+  if(!confirm(`Supprimer ${DASH.selected.size} scénario(s) ?`))return;
+  S.sims=S.sims.filter(s=>!DASH.selected.has(s.id));
+  DASH.selected.clear();
+  saveState();R();gasSync(false);
+  toast('Scénarios supprimés');
+};
+window.bulkDuplicate=()=>{
+  const toDup=S.sims.filter(s=>DASH.selected.has(s.id));
+  toDup.forEach(s=>S.sims.push({...s,id:S.nid++,nm:s.nm+' (copie)',date:mkDate()}));
+  DASH.selected.clear();
+  saveState();R();gasSync(false);
+  toast(`${toDup.length} scénario(s) dupliqué(s)`);
+};
+
+// ═══════════════════════════════════════════════════════════════
+// COMPARE MODAL
+// ═══════════════════════════════════════════════════════════════
+window.openCompareModal=()=>{
+  const ids=Array.from(DASH.selected);
+  const items=S.sims.filter(s=>ids.includes(s.id));
+  if(items.length<2){toast('Sélectionnez au moins 2 scénarios','warn');return;}
+
+  // Construit le modal dynamiquement
+  let existing=document.getElementById('modal-compare');
+  if(existing)existing.remove();
+
+  const etps=items.map(s=>extractEtp(s.meta));
+  const ags=items.map(s=>extractAg(s.meta));
+  const minEtp=Math.min(...etps.filter(x=>x>0));
+  const maxEtp=Math.max(...etps);
+
+  const overlay=document.createElement('div');
+  overlay.className='modal-overlay open';
+  overlay.id='modal-compare';
+  overlay.innerHTML=`<div class="modal modal-compare">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Comparaison de scénarios</div>
+        <div class="modal-sub">${items.length} scénarios sélectionnés</div>
+      </div>
+      <button class="modal-close" onclick="closeCompareModal()">✕</button>
+    </div>
+    <table class="compare-table">
+      <thead><tr><th>Critère</th>${items.map(s=>`<th>${(s.nm||'').replace(/</g,'&lt;')}</th>`).join('')}</tr></thead>
+      <tbody>
+        <tr><td>Type</td>${items.map(s=>`<td><span class="scenario-badge ${s.type}">${s.type==='bo'?'Back Office':s.type==='out'?'Sortants':'Simulation'}</span></td>`).join('')}</tr>
+        <tr><td>Résumé</td>${items.map(s=>`<td style="font-family:'Poppins',sans-serif;color:var(--muted);font-size:11px">${s.meta||'—'}</td>`).join('')}</tr>
+        <tr><td>ETP nécessaires</td>${items.map((s,i)=>{
+          const e=etps[i];
+          const cls=e===minEtp&&e>0?'row-best':e===maxEtp&&items.length>2?'row-worst':'';
+          return `<td class="${cls}" style="color:var(--green);font-weight:600">${e?f2(e):'—'}</td>`;
+        }).join('')}</tr>
+        <tr><td>Agents à recruter</td>${items.map((s,i)=>`<td style="color:var(--amber);font-weight:600">${ags[i]||'—'}</td>`).join('')}</tr>
+        <tr><td>Auteur</td>${items.map(s=>`<td style="font-family:'Poppins',sans-serif">${s.modifiedBy||'—'}</td>`).join('')}</tr>
+        <tr><td>Date</td>${items.map(s=>`<td style="font-family:'Poppins',sans-serif;color:var(--muted);font-size:11px">${fmtDate(s.date)}</td>`).join('')}</tr>
+        <tr><td>Commentaire</td>${items.map(s=>`<td style="font-family:'Poppins',sans-serif;color:var(--text2);font-size:11px">${s.commentaire||'—'}</td>`).join('')}</tr>
+      </tbody>
+    </table>
+    <div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--border);font-size:11px;color:var(--muted);display:flex;gap:14px;flex-wrap:wrap">
+      <span><span style="display:inline-block;width:10px;height:10px;background:var(--green-bg);border-radius:3px;vertical-align:middle"></span> ETP le plus bas (meilleur)</span>
+      ${items.length>2?`<span><span style="display:inline-block;width:10px;height:10px;background:var(--red-bg);border-radius:3px;vertical-align:middle"></span> ETP le plus élevé</span>`:''}
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:18px">
+      <button class="btn btn-outline" onclick="closeCompareModal()">Fermer</button>
+      <button class="btn btn-dark" onclick="exportCompareCSV()">📥 Exporter cette comparaison</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+};
+window.closeCompareModal=()=>{
+  const el=document.getElementById('modal-compare');
+  if(el)el.remove();
+};
+
+// ═══════════════════════════════════════════════════════════════
+// EXPORT CSV
+// ═══════════════════════════════════════════════════════════════
+function csvEscape(v){
+  const s=String(v??'');
+  if(s.includes(',')||s.includes('"')||s.includes('\n'))return '"'+s.replace(/"/g,'""')+'"';
+  return s;
+}
+function downloadCSV(filename,rows){
+  const csv=rows.map(r=>r.map(csvEscape).join(',')).join('\n');
+  const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});
+  const link=document.createElement('a');
+  link.href=URL.createObjectURL(blob);
+  link.download=filename;
+  link.click();
+  setTimeout(()=>URL.revokeObjectURL(link.href),100);
+}
+window.exportCSV=()=>{
+  const list=filterAndSortSims();
+  if(!list.length){toast('Rien à exporter','warn');return;}
+  const rows=[['Type','Nom','Activité','Volume','Période','Jours','DMT','ETP','Agents','Auteur','Date','Commentaire','Résumé']];
+  list.forEach(s=>{
+    const acts=s.p?.acts||[];
+    if(acts.length){
+      acts.forEach(a=>{
+        rows.push([
+          s.type==='bo'?'Back Office':s.type==='out'?'Sortants':'Simulation',
+          s.nm,a.nm||'',a.vol||'',a.volPeriod||'',
+          (a.jours||[]).join('-'),a.dmt||a.dma||'',
+          extractEtp(s.meta),extractAg(s.meta),
+          s.modifiedBy||'',s.date||'',s.commentaire||'',s.meta||''
+        ]);
+      });
+    } else {
+      rows.push([
+        s.type==='bo'?'Back Office':s.type==='out'?'Sortants':'Simulation',
+        s.nm,'','','','','',extractEtp(s.meta),extractAg(s.meta),
+        s.modifiedBy||'',s.date||'',s.commentaire||'',s.meta||''
+      ]);
+    }
+  });
+  downloadCSV(`workforce-planner-${new Date().toISOString().slice(0,10)}.csv`,rows);
+  toast('Export CSV téléchargé ✓');
+};
+window.exportCompareCSV=()=>{
+  const items=S.sims.filter(s=>DASH.selected.has(s.id));
+  const rows=[['Scénario','Type','ETP','Agents','Auteur','Date','Résumé','Commentaire']];
+  items.forEach(s=>{
+    rows.push([
+      s.nm,
+      s.type==='bo'?'Back Office':s.type==='out'?'Sortants':'Simulation',
+      extractEtp(s.meta),extractAg(s.meta),
+      s.modifiedBy||'',s.date||'',s.meta||'',s.commentaire||''
+    ]);
+  });
+  downloadCSV(`comparaison-${new Date().toISOString().slice(0,10)}.csv`,rows);
+  toast('Comparaison exportée ✓');
+};
+
+// ═══════════════════════════════════════════════════════════════
+// MODAL NEW DIM
+// ═══════════════════════════════════════════════════════════════
+function openModalNew(){document.getElementById('modal-new').classList.add('open');}
+function closeModalNew(){document.getElementById('modal-new').classList.remove('open');}
+function newDim(type){
+  closeModalNew();
+  if(type==='bo'){
+    S.bo={acts:[JSON.parse(JSON.stringify(TPL_BO))],nid:2};
+    S.editingSimId=null;
+    resetShrinkagesToGlobal(true);
+    gotoTab('bo');
+  }else if(type==='out'){
+    S.out={acts:[JSON.parse(JSON.stringify(TPL_OUT))],nid:2};
+    S.editingSimId=null;
+    resetShrinkagesToGlobal(true);
+    gotoTab('out');
+  }else{
+    S.sim=JSON.parse(JSON.stringify(TPL_SIM));
+    S.editingSimId=null;
+    resetShrinkagesToGlobal(true);
+    gotoTab('sim');
+  }
+  toast('Nouveau dimensionnement créé');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER BO
+// ═══════════════════════════════════════════════════════════════
+function rBO(){
+  const acts=S.bo.acts;
+  const results=acts.map(calcBO);
+  const errsAll=acts.map(validateBO);
+const totETP=results.reduce((a,r)=>a+r.etp_brut,0);
+  const totAg=results.reduce((a,r)=>a+r.ag_recrute,0);
+  const anyErr=errsAll.some(hasErrors);
+  return `
+<div class="page-header">
+  <div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:4px;cursor:pointer" onclick="gotoTab('dash')">← Tableau de bord</div>
+    <div class="page-title">Back Office</div>
+    <div class="page-sub">Flux entrant — Erlang-C, agents simultanés et ETP sur la période</div>
+  </div>
+  <div class="page-actions">
+    ${guidePopover('bo')}
+    <button class="btn btn-outline btn-sm" onclick="addActBO()">+ Activité</button>
+    <button class="btn btn-outline btn-sm" onclick="exportPDF('bo')">⬇ PDF</button>
+    <button class="btn btn-dark btn-sm" onclick="saveBO()">Enregistrer</button>
+  </div>
+</div>
+
+${acts.map((a,i)=>{const r=results[i];const errs=errsAll[i];const period=a.volPeriod||'mois';const isJour=period==='jour';return `
+<div class="wp-act">
+  <div class="wp-act-hdr">
+    <div><div class="wp-act-label">Activité ${i+1}</div><div class="wp-act-name">${a.nm||'(sans nom)'}</div></div>
+    ${acts.length>1?`<button class="btn btn-outline btn-sm" style="color:var(--red)" onclick="rmActBO(${i})">✕</button>`:''}
+  </div>
+  <div class="form-row">
+    ${fieldWrap(errs,'nm',`<label>Nom de l'activité ${editBadge()}</label><input value="${(a.nm||'').replace(/"/g,'&quot;')}" onblur="uBO(${i},'nm',this.value)">`)}
+    <div class="field">
+      <label>Volume à traiter sur la période ${editBadge()} ${tip('Volume saisi sur la période choisie. Pas de conversion automatique.')}</label>
+      <input type="number" min="1" value="${a.vol}" onchange="uBO(${i},'vol',+this.value)">
+      ${volPeriodHTML(period,`setVPBO.bind(null,${i})`)}
+      <div class="field-hint">${a.vol||0} actes à traiter sur ${periodLabel(period)}</div>
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="field is-locked">
+      <label>Base contractuelle ${lockBadge()} ${tip('Base légale fixe : 173,33h/mois · 40h/sem · 8h/jour. Les shrinkages s\'appliquent sur cette base.')}</label>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 11px;font-size:13px;font-weight:600;font-family:'JetBrains Mono',monospace;color:var(--text2)">
+        ${period==='jour'?'8h / jour':period==='semaine'?'40h / sem.':'173,33h / mois'}
+      </div>
+      ${r.warnHj?`<div class="field-warn">⚠ Plage (${f1(r.hPlage)}h) inférieure à la base journalière</div>`:`<div style="font-size:10px;color:var(--muted);margin-top:4px">Capa agent (base brute) : <b style="font-family:'JetBrains Mono',monospace">${f2(r.capaAgent)}h/${periodLabel(period)}</b></div>`}
+    </div>
+  </div>
+  <div class="form-row f4">
+    ${fieldWrap(errs,'dmt',`<label>DMT globale (secondes) ${editBadge()}</label><input type="number" min="1" value="${a.dmt}" onchange="uBO(${i},'dmt',+this.value)">`)}
+    ${fieldWrap(errs,'interactions',`<label>Interactions ${editBadge()}</label><input type="number" min="1" value="${a.interactions||1}" onchange="uBO(${i},'interactions',+this.value)">`,`DMT réelle : <b style="font-family:'JetBrains Mono',monospace">${f1(r.dmtReel)}s</b>`)}
+    ${fieldWrap(errs,'sp',`<label>SL cible (%) ${editBadge()}</label><input type="number" min="1" max="100" value="${a.sp}" onchange="uBO(${i},'sp',+this.value)">`)}
+    ${fieldWrap(errs,'ss',`<label>SL objectif (secondes) ${editBadge()}</label><input type="number" min="1" value="${a.ss}" onchange="uBO(${i},'ss',+this.value)">`,h2(a.ss))}
+  </div>
+  ${hasErrors(errs)?`<div style="background:var(--red-bg);border:1px solid var(--red);border-radius:8px;padding:8px 12px;font-size:11px;color:var(--red);margin-bottom:8px">⚠ Corrigez les erreurs ci-dessus.</div>`:`
+<div class="res-grid r5">
+    <div class="res-cell"><div class="res-lbl">H. productives</div><div class="res-val b">${f2(r.hp)}h</div></div>
+    <div class="res-cell"><div class="res-lbl">H. travaillées</div><div class="res-val m">${f2(r.htrav)}h</div></div>
+    <div class="res-cell"><div class="res-lbl">H. payées</div><div class="res-val m">${f2(r.hpay)}h</div></div>
+    <div class="res-cell"><div class="res-lbl">Noyaux durs ${tip(`ETP basé sur la capacité réelle d'1 agent sur la période choisie — couvre la charge totale à traiter`)}</div><div class="res-val g">${f2(r.etp_brut)}</div></div>
+    <div class="res-cell"><div class="res-lbl">Agents à recruter ${tip(`Effectif total à recruter, incluant le sureffectif pour absences/TO/congés. 
+      Comprend le nombre d'agents en simultanés nécessaires pour tenir le SL.`)}</div><div class="res-val a">${r.ag_recrute}</div></div>
+  </div>
+  <div style="font-size:10px;color:var(--muted);margin-top:8px;display:flex;gap:12px;flex-wrap:wrap">
+    <span>A = ${r.A} Erl</span>
+    <span>SL ${a.sp}% en ${h2(a.ss)}</span>
+  </div>
+  <div style="font-size:10px;color:var(--muted);margin-top:6px;display:flex;gap:16px;flex-wrap:wrap">
+    <span>Actes/agent : <b style="color:var(--text2)">${f1(period==='jour'?r.actesParAgent.jour:period==='semaine'?r.actesParAgent.sem:r.actesParAgent.mois)}/${periodLabel(period)}</b></span>
+    <span>Actes/ETP : <b style="color:var(--text2)">${f1(period==='jour'?r.actesParETP.jour:period==='semaine'?r.actesParETP.sem:r.actesParETP.mois)}/${periodLabel(period)}</b></span>
+  </div>`}
+  ${cmt(a,'tgCmtBO('+i+')','uBO('+i+',"commentaire",this.value)')}
+</div>`}).join('')}
+${acts.length>1&&!anyErr?`<div class="total-bar">
+  <span>Total Noyaux durs : <b style="color:var(--green)">${f2(totETP)}</b></span>
+  <span>Total Agents : <b style="color:var(--amber)">${totAg}</b></span>
+</div>`:''}`;
+
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER OUT
+// ═══════════════════════════════════════════════════════════════
+function rOUT(){
+  const acts=S.out.acts;
+  const results=acts.map(calcAct);
+  const errsAll=acts.map(validateOUT);
+  const totHP=results.reduce((a,r)=>a+r.hp,0);
+  const totETP=results.reduce((a,r)=>a+r.etp,0);
+  const totAg=results.reduce((a,r)=>a+r.ag,0);
+  const anyErr=errsAll.some(hasErrors);
+  return `
+<div class="page-header">
+  <div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:4px;cursor:pointer" onclick="gotoTab('dash')">← Tableau de bord</div>
+    <div class="page-title">Appels Sortants</div>
+    <div class="page-sub">Campagne — combien d'agents pour liquider le volume sur la période choisie</div>
+  </div>
+  <div class="page-actions">
+    ${guidePopover('out')}
+    <button class="btn btn-outline btn-sm" onclick="addActOUT()">+ Activité</button>
+    <button class="btn btn-outline btn-sm" onclick="exportPDF('out')">⬇ PDF</button>
+    <button class="btn btn-dark btn-sm" onclick="saveOUT()">Enregistrer</button>
+  </div>
+</div>
+
+${acts.map((a,i)=>{const r=results[i];const errs=errsAll[i];const period=a.volPeriod||'mois';const isJour=period==='jour';return `
+<div class="wp-act">
+  <div class="wp-act-hdr">
+    <div><div class="wp-act-label">Activité ${i+1}</div><div class="wp-act-name">${a.nm||'(sans nom)'}</div></div>
+    ${acts.length>1?`<button class="btn btn-outline btn-sm" style="color:var(--red)" onclick="rmActOUT(${i})">✕</button>`:''}
+  </div>
+  <div class="form-row">
+    ${fieldWrap(errs,'nm',`<label>Nom de l'activité ${editBadge()}</label><input value="${(a.nm||'').replace(/"/g,'&quot;')}" onblur="uOUT(${i},'nm',this.value)">`)}
+    <div class="field">
+      <label>Volume à traiter sur la période ${editBadge()} ${tip('Volume saisi sur la période choisie.')}</label>
+      <input type="number" min="1" value="${a.vol}" onchange="uOUT(${i},'vol',+this.value)">
+      ${volPeriodHTML(period,`setVPOUT.bind(null,${i})`)}
+      <div class="field-hint">${a.vol||0} fiches à traiter sur ${periodLabel(period)}</div>
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="field is-locked">
+      <label>Base contractuelle ${lockBadge()} ${tip('Base légale fixe : 173,33h/mois · 40h/sem · 8h/jour. Les shrinkages s\'appliquent sur cette base.')}</label>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 11px;font-size:13px;font-weight:600;font-family:'JetBrains Mono',monospace;color:var(--text2)">
+        ${period==='jour'?'8h / jour':period==='semaine'?'40h / sem.':'173,33h / mois'}
+      </div>
+      ${r.warnHj?`<div class="field-warn">⚠ Plage (${f1(r.hPlage)}h) inférieure à la base journalière</div>`:`<div style="font-size:10px;color:var(--muted);margin-top:4px">Capa agent (base brute) : <b style="font-family:'JetBrains Mono',monospace">${f2(r.capaAgent)}h/${periodLabel(period)}</b></div>`}
+    </div>
+  </div>
+  <div class="form-row f3">
+    ${fieldWrap(errs,'ta',`<label>Taux aboutis (%) ${editBadge()}</label><input type="number" min="0" max="100" step="0.1" value="${a.ta}" onchange="uOUT(${i},'ta',+this.value)">`)}
+    ${fieldWrap(errs,'tentatives',`<label>Tentatives ${editBadge()}</label><input type="number" min="1" value="${a.tentatives||1}" onchange="uOUT(${i},'tentatives',+this.value)">`,`Non aboutis total : <b style="font-family:'JetBrains Mono',monospace">${f0(r.nab_total)}</b>`)}
+    <div class="field is-locked"><label>Volume total d'appels ${lockBadge()} ${tip('Aboutis + (Non aboutis × Tentatives)')}</label>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 11px;font-size:15px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--accent)">${f0(r.vol_total)}</div>
+    </div>
+  </div>
+  <div class="form-row">
+    ${fieldWrap(errs,'dma',`<label>DMT aboutis (secondes) ${editBadge()}</label><input type="number" min="1" value="${a.dma}" onchange="uOUT(${i},'dma',+this.value)">`)}
+    ${fieldWrap(errs,'dmna',`<label>DMT non aboutis (secondes) ${editBadge()}</label><input type="number" min="0" value="${a.dmna}" onchange="uOUT(${i},'dmna',+this.value)">`)}
+  </div>
+  ${hasErrors(errs)?`<div style="background:var(--red-bg);border:1px solid var(--red);border-radius:8px;padding:8px 12px;font-size:11px;color:var(--red);margin-bottom:8px">⚠ Corrigez les erreurs ci-dessus.</div>`:`
+  <div class="res-grid r5">
+    <div class="res-cell"><div class="res-lbl">Aboutis</div><div class="res-val m">${f0(r.ab)}</div></div>
+    <div class="res-cell"><div class="res-lbl">H. productives</div><div class="res-val b">${f2(r.hp)}h</div></div>
+    <div class="res-cell"><div class="res-lbl">H. payées</div><div class="res-val m">${f2(r.hpay)}h</div></div>
+    <div class="res-cell"><div class="res-lbl">ETP nécessaires</div><div class="res-val g">${f2(r.etp)}</div></div>
+    <div class="res-cell"><div class="res-lbl">Agents à recruter ${tip('Effectif total à recruter incluant le sureffectif pour absences, TO, congés')}</div><div class="res-val a">${r.ag}</div></div>
+  </div>
+  <div style="font-size:10px;color:var(--muted);margin-top:8px;display:flex;gap:12px;flex-wrap:wrap">
+    <span>Capa agent : <b>${f2(r.capaAgent)}h/${periodLabel(period)}</b></span>
+    <span>${r.nbJours} jour${r.nbJours>1?'s':''} travaillé${r.nbJours>1?'s':''}</span>
+    <span>DMT moy. : ${f1((a.ta/100)*a.dma+(1-a.ta/100)*a.dmna)}s</span>
+  </div>
+  <div style="font-size:10px;color:var(--muted);margin-top:6px;display:flex;gap:16px;flex-wrap:wrap">
+    <span>Aboutis/agent : <b style="color:var(--text2)">${f1(period==='jour'?r.actesParAgent.jour:period==='semaine'?r.actesParAgent.sem:r.actesParAgent.mois)}/${periodLabel(period)}</b></span>
+    <span>Aboutis/ETP : <b style="color:var(--text2)">${f1(period==='jour'?r.actesParETP.jour:period==='semaine'?r.actesParETP.sem:r.actesParETP.mois)}/${periodLabel(period)}</b></span>
+  </div>`}
+  ${cmt(a,'tgCmtOUT('+i+')','uOUT('+i+',"commentaire",this.value)')}
+</div>`}).join('')}
+${acts.length>1&&!anyErr?`<div class="total-bar">
+  <span>Total H.prod : <b style="color:var(--blue)">${f2(totHP)}h</b></span>
+  <span>Total ETP : <b style="color:var(--green)">${f2(totETP)}</b></span>
+  <span>Total Agents : <b style="color:var(--amber)">${totAg}</b></span>
+</div>`:''}`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER SIM
+// ═══════════════════════════════════════════════════════════════
+function rSIM(){
+  const sim=S.sim,res=calcSim();
+  const pa=sim.periodeAff;
+  const chartMode=sim.chartMode||'duree';
+  const leftRows=pa==='mois'?res.rowsMois:pa==='sem'?res.rowsSem:res.rowsJour;
+  const unit=pa==='mois'?'mois':pa==='sem'?'sem.':'jours';
+  const getVal=r=>pa==='mois'?r.mois:pa==='sem'?r.sem:r.jour;
+  const maxL=leftRows[0]?.etp||1;
+  const maxE=getVal(res.rowsETP[0])||1;
+  return `
+<div class="page-header">
+  <div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:4px;cursor:pointer" onclick="gotoTab('dash')">← Tableau de bord</div>
+    <div class="page-title">Simulation ETP</div>
+    <div class="page-sub">Volume total à liquider — combien d'ETP selon la durée</div>
+  </div>
+  <div class="page-actions">
+    ${guidePopover('sim')}
+    <button class="btn btn-outline btn-sm" onclick="exportPDF('sim')">⬇ PDF</button>
+    <button class="btn btn-dark btn-sm" onclick="saveSIM()">Enregistrer</button>
+  </div>
+</div>
+<div class="card">
+  <div class="card-header"><div class="card-title">Paramètres</div></div>
+  <div class="form-row">
+    <div class="field"><label>Nom de la simulation</label><input value="${sim.nm||''}" onblur="S.sim.nm=this.value;R()"></div>
+    <div style="display:flex;gap:6px;align-items:flex-end;padding-bottom:2px">
+      <button class="btn ${sim.type==='bo'?'btn-dark':'btn-outline'} btn-sm" onclick="S.sim.type='bo';R()">Back Office</button>
+      <button class="btn ${sim.type==='out'?'btn-dark':'btn-outline'} btn-sm" onclick="S.sim.type='out';R()">Sortants</button>
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="field"><label>Volume total à traiter</label><input type="number" min="1" value="${sim.vol}" onchange="S.sim.vol=+this.value;R()"></div>
+    ${sim.type==='bo'
+      ? `<div class="field"><label>DMT (secondes)</label><input type="number" min="1" value="${sim.dmt}" onchange="S.sim.dmt=+this.value;R()"></div>`
+      : `<div class="field"><label>DMT aboutis (secondes)</label><input type="number" min="1" value="${sim.dma}" onchange="S.sim.dma=+this.value;R()"></div>`
+    }
+  </div>
+  ${sim.type==='bo'?`<div class="form-row">
+    <div class="field"><label>Interactions</label><input type="number" min="1" value="${sim.interactions||1}" onchange="S.sim.interactions=+this.value;R()"></div>
+    <div class="field"><div style="font-size:10px;color:var(--muted);padding-top:22px">DMT réelle : <b>${f1(sim.dmt/(sim.interactions||1))}s</b></div></div>
+  </div>`:`<div class="form-row f3">
+    <div class="field"><label>Taux aboutis (%)</label><input type="number" min="0" max="100" value="${sim.ta}" onchange="S.sim.ta=+this.value;R()"></div>
+    <div class="field"><label>DMT non aboutis (secondes)</label><input type="number" min="0" value="${sim.dmna}" onchange="S.sim.dmna=+this.value;R()"></div>
+    <div class="field"><label>Tentatives (recyclage)</label><input type="number" min="1" max="20" value="${sim.tentatives||1}" onchange="S.sim.tentatives=+this.value;R()"></div>
+  </div>`}
+  ${sim.type==='out'?`<div style="border-top:1px solid var(--border);margin-top:10px;padding-top:12px;font-size:11px;color:var(--muted)">Aboutis estimés : <b style="color:var(--green)">${res.vol_aboutis}</b> · Total appels : <b style="color:var(--amber)">${res.vol_total_appels}</b></div>`:''}
+  ${cmt(sim,'S.sim.showComment=!S.sim.showComment;R()','S.sim.commentaire=this.value')}
+</div>
+<div class="card">
+  <div class="card-header"><div class="card-title">Résultats</div></div>
+  <div class="ptabs">
+    <button class="ptab ${pa==='mois'?'on':''}" onclick="S.sim.periodeAff='mois';R()">Mensuel</button>
+    <button class="ptab ${pa==='sem'?'on':''}" onclick="S.sim.periodeAff='sem';R()">Hebdomadaire</button>
+    <button class="ptab ${pa==='jour'?'on':''}" onclick="S.sim.periodeAff='jour';R()">Journalier</button>
+  </div>
+  <div style="display:flex;gap:6px;margin:10px 0 2px">
+    <button class="btn btn-sm ${chartMode==='duree'?'btn-dark':'btn-outline'}" onclick="S.sim.chartMode='duree';R()">Durée → ETP</button>
+    <button class="btn btn-sm ${chartMode==='etp'?'btn-dark':'btn-outline'}" onclick="S.sim.chartMode='etp';R()">ETP → Durée</button>
+  </div>
+  <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:20px;margin-top:8px;align-items:start">
+    <div>
+      ${simChart(chartMode==='etp'?res.rowsETP:leftRows,unit,sim.type,chartMode,pa)}
+      ${simSummaryTable(chartMode==='etp'?res.rowsETP:leftRows,unit,sim.type,chartMode,pa)}
+    </div>
+    ${simSideInfo(res,sim.type,pa,sim)}
+  </div>
+</div>`;
+}
+
+// ─── Bloc latéral : H.besoins + Capacité par ETP (journalier/hebdo/mensuel) + résumé scénario ───
+function simSideInfo(res,type,pa,sim){
+  const rows=[
+    {key:'jour',lbl:'Journalier',ab:res.capa_ab_jour,tot:res.capa_tot_jour},
+    {key:'sem',lbl:'Hebdomadaire',ab:res.capa_ab_sem,tot:res.capa_tot_sem},
+    {key:'mois',lbl:'Mensuel',ab:res.capa_ab_mois,tot:res.capa_tot_mois}
+  ];
+  const periodLbl=pa==='mois'?'Mois':pa==='sem'?'Semaine':'Jour';
+  return `
+  <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:14px">
+    <div>
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:8px">Besoins</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.8;font-family:'JetBrains Mono',monospace">
+        H.productives néc. : <b style="color:var(--blue)">${f2(res.hp_needed)} h</b><br>
+        H.payées nécessaires : <b>${f2(res.hpay_needed)} h</b>
+      </div>
+    </div>
+    <div style="border-top:1px solid var(--border);padding-top:12px">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:8px">Capacité par ETP</div>
+      <table style="width:100%;border-collapse:collapse;font-size:10.5px">
+        <thead><tr style="border-bottom:1px solid var(--border)">
+          <th style="text-align:left;padding:3px 4px;color:var(--muted);font-weight:600">Période</th>
+          ${type==='out'?`
+            <th style="text-align:right;padding:3px 4px;color:var(--green);font-weight:600">Aboutis/ETP</th>
+            <th style="text-align:right;padding:3px 4px;color:var(--amber);font-weight:600">Total/ETP</th>
+          `:`<th style="text-align:right;padding:3px 4px;color:var(--green);font-weight:600">Actes/ETP</th>`}
+        </tr></thead>
+        <tbody>
+          ${rows.map((r,i)=>{const active=r.key===pa;return `<tr style="${i<rows.length-1?'border-bottom:1px solid var(--border);':''}${active?'background:var(--surface)':''}">
+            <td style="padding:4px 4px;color:${active?'var(--text)':'var(--text2)'};font-weight:${active?'700':'400'}">${r.lbl}${active?' <span style="font-size:8px;color:var(--green)">●</span>':''}</td>
+            <td style="text-align:right;padding:4px 4px;font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--green)">${r.ab!=null?r.ab:'—'}</td>
+            ${type==='out'?`<td style="text-align:right;padding:4px 4px;font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--amber)">${r.tot!=null?r.tot:'—'}</td>`:''}
+          </tr>`;}).join('')}
+        </tbody>
+      </table>
+    </div>
+    <div style="border-top:1px solid var(--border);padding-top:12px">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:8px">Scénario</div>
+      <div style="font-size:11px;color:var(--text2);line-height:1.85">
+        Type : <b style="color:var(--text)">${type==='out'?'Sortants':'Back Office'}</b><br>
+        Volume : <b style="color:var(--text)">${f1(sim.vol)}</b> / ${periodLbl.toLowerCase()}<br>
+        ${type==='out'
+          ?`Taux aboutis : <b style="color:var(--text)">${f1(sim.ta)}%</b><br>DMT aboutis : <b style="color:var(--text)">${sim.dma}s</b><br>DMT non aboutis : <b style="color:var(--text)">${sim.dmna}s</b>`
+          :`DMT : <b style="color:var(--text)">${sim.dmt}s</b><br>Interactions : <b style="color:var(--text)">${sim.interactions||1}</b>`}
+      </div>
+    </div>
+  </div>`;
+}
+
+// ─── Graphique courbe ETP ↔ Durée (cliquable) + tableau résumé compact ───
+function simChart(rows,unit,type,mode,pa){
+  mode=mode||'duree';
+  const isETPmode=mode==='etp';
+  const durKey=pa==='mois'?'mois':pa==='sem'?'sem':'jour';
+  const W=480,H=160,padL=42,padR=8,padT=12,padB=30;
+  const n=rows.length;
+  // Durée→ETP : x=durée(r.n), y=ETP(r.etp) — ETP→Durée : x=ETP(r.e), y=durée(r[durKey])
+  const yVal=r=>isETPmode?r[durKey]:r.etp;
+  const xLab=(r)=>isETPmode?r.e:r.n;
+  const maxY=Math.max(...rows.map(yVal),1);
+  const x=i=>padL+(i/(n-1))*(W-padL-padR);
+  const y=v=>padT+(1-v/maxY)*(H-padT-padB);
+  const pts=rows.map((r,i)=>`${x(i).toFixed(1)},${y(yVal(r)).toFixed(1)}`).join(' ');
+  const areaPts=`${x(0).toFixed(1)},${y(0).toFixed(1)} ${pts} ${x(n-1).toFixed(1)},${y(0).toFixed(1)}`;
+  const ySteps=[0,0.25,0.5,0.75,1].map(f=>({v:maxY*f,yy:y(maxY*f)}));
+  // Tous les points sont cliquables ; seul l'espacement des LABELS texte est réduit pour rester lisible
+  const dots=rows.map((r,i)=>({r,i}));
+  const labelStep=n<=12?1:n<=20?2:3;
+  const xLabel=isETPmode?'Nombre d\'ETP':`Durée (${unit})`;
+  const yLabel=isETPmode?`Durée (${unit})`:'ETP nécessaires';
+  return `
+  <div style="position:relative;margin:8px 0 4px">
+    <svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block" id="sim-chart-svg" preserveAspectRatio="none">
+      ${ySteps.map(s=>`<line x1="${padL}" y1="${s.yy.toFixed(1)}" x2="${W-padR}" y2="${s.yy.toFixed(1)}" stroke="var(--border)" stroke-width="1"/>
+        <text x="${padL-6}" y="${(s.yy+3).toFixed(1)}" text-anchor="end" font-size="8.5" fill="var(--muted)" font-family="'JetBrains Mono',monospace">${f1(s.v)}</text>`).join('')}
+      <polygon points="${areaPts}" fill="var(--green-dot)" opacity="0.08"/>
+      <polyline points="${pts}" fill="none" stroke="var(--green-dot)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+      ${dots.map(({r,i})=>`<circle cx="${x(i).toFixed(1)}" cy="${y(yVal(r)).toFixed(1)}" r="2.6" fill="var(--surface)" stroke="var(--green-dot)" stroke-width="1.6" style="cursor:pointer" onclick="showSimPoint(${i})" data-i="${i}"/>`).join('')}
+      ${dots.filter((_,k)=>k%labelStep===0||k===n-1).map(({r,i})=>`<text x="${x(i).toFixed(1)}" y="${H-padB+14}" text-anchor="middle" font-size="8" fill="var(--muted)">${xLab(r)}</text>`).join('')}
+      <text x="${(padL+W-padR)/2}" y="${H-4}" text-anchor="middle" font-size="8.5" fill="var(--text2)" font-weight="600">${xLabel}</text>
+      <text x="5" y="${(padT+H-padB)/2}" text-anchor="middle" font-size="8.5" fill="var(--text2)" font-weight="600" transform="rotate(-90,11,${(padT+H-padB)/2})">${yLabel}</text>
+    </svg>
+    <div id="sim-point-detail" style="display:none;margin-top:8px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 13px;font-size:11px"></div>
+  </div>
+  <div style="font-size:9.5px;color:var(--muted);text-align:center;margin-bottom:8px">Cliquez un point pour le détail</div>`;
+}
+function simSummaryTable(rows,unit,type,mode,pa){
+  const showN=6;
+  const isETPmode=(mode||'duree')==='etp';
+  const durKey=pa==='mois'?'mois':pa==='sem'?'sem':'jour';
+  if(isETPmode){
+    // Mode ETP→Durée : colonnes ETP / Agents / Durée
+    const mkRow=(r,i)=>`<tr style="${i===0?'background:var(--green-bg)':''}"><td><b style="color:var(--green)">${r.e} ETP</b></td><td class="num">${r.ag}</td><td class="num">${f2(r[durKey])} ${unit}</td></tr>`;
+    return `
+    <table class="sim-summary-table">
+      <thead><tr><th>ETP</th><th class="num">Agents</th><th class="num">Durée</th></tr></thead>
+      <tbody id="sim-summary-body">${rows.slice(0,showN).map(mkRow).join('')}</tbody>
+      <tbody id="sim-summary-more" style="display:none">${rows.slice(showN).map((r,i)=>mkRow(r,i+showN)).join('')}</tbody>
+    </table>
+    ${rows.length>showN?`<button class="btn btn-outline btn-sm" style="margin-top:8px" onclick="toggleSimMore()" id="sim-more-btn">▾ Voir les ${rows.length-showN} autres valeurs</button>`:''}`;
+  }
+  // Mode Durée→ETP : colonnes Durée / ETP / Agents
+  const mkRow=(r,i)=>`<tr style="${i===0?'background:var(--green-bg)':''}"><td>${r.n} ${unit}</td><td class="num"><b style="color:var(--green)">${f2(r.etp)}</b></td><td class="num">${r.ag}</td></tr>`;
+  return `
+  <table class="sim-summary-table">
+    <thead><tr><th>Durée</th><th class="num">ETP</th><th class="num">Agents</th></tr></thead>
+    <tbody id="sim-summary-body">${rows.slice(0,showN).map(mkRow).join('')}</tbody>
+    <tbody id="sim-summary-more" style="display:none">${rows.slice(showN).map((r,i)=>mkRow(r,i+showN)).join('')}</tbody>
+  </table>
+  ${rows.length>showN?`<button class="btn btn-outline btn-sm" style="margin-top:8px" onclick="toggleSimMore()" id="sim-more-btn">▾ Voir les ${rows.length-showN} autres durées</button>`:''}`;
+}
+window.showSimPoint=(i)=>{
+  const sim=S.sim,res=calcSim();
+  const pa=sim.periodeAff;
+  const mode=sim.chartMode||'duree';
+  const unit=pa==='mois'?'mois':pa==='sem'?'sem.':'jours';
+  const durKey=pa==='mois'?'mois':pa==='sem'?'sem':'jour';
+  document.querySelectorAll('#sim-chart-svg circle').forEach(c=>c.setAttribute('fill','var(--surface)'));
+  document.querySelector(`#sim-chart-svg circle[data-i="${i}"]`)?.setAttribute('fill','var(--green-dot)');
+  const el=document.getElementById('sim-point-detail');
+  el.style.display='block';
+  if(mode==='etp'){
+    const r=res.rowsETP[i];if(!r)return;
+    el.innerHTML=`<b>${r.e} ETP</b> &nbsp;·&nbsp; Durée nécessaire : <b style="color:var(--green)">${f2(r[durKey])} ${unit}</b> &nbsp;·&nbsp; Agents : <b style="color:var(--amber)">${r.ag}</b>`;
+  }else{
+    const rows=pa==='mois'?res.rowsMois:pa==='sem'?res.rowsSem:res.rowsJour;
+    const r=rows[i];if(!r)return;
+    el.innerHTML=`<b>${r.n} ${unit}</b> &nbsp;·&nbsp; ETP : <b style="color:var(--green)">${f2(r.etp)}</b> &nbsp;·&nbsp; Agents : <b style="color:var(--amber)">${r.ag}</b>`;
+  }
+};
+window.toggleSimMore=()=>{
+  const more=document.getElementById('sim-summary-more');
+  const btn=document.getElementById('sim-more-btn');
+  const isHidden=more.style.display==='none';
+  more.style.display=isHidden?'table-row-group':'none';
+  btn.textContent=isHidden?'▴ Réduire':btn.textContent.replace('▴ Réduire','▾ Voir plus');
+};
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER SH
+// ═══════════════════════════════════════════════════════════════
+function rSH(){
+  const isAdmin=S.user?.role==='admin';
+  return `
+<div class="page-header">
+  <div>
+    <div class="page-title">Mes shrinkages</div>
+    <div class="page-sub">${isAdmin?'Vous êtes administrateur : vous pouvez définir le référentiel global.':'Personnalisez vos valeurs de session (réinitialisées à l ouverture d un nouveau dimensionnement).'}</div>
+  </div>
+  <div class="page-actions">
+    ${shrinkagesModified()?`<button class="btn btn-outline btn-sm" onclick="resetShrinkagesToGlobal()">↺ Réinitialiser</button>`:''}
+    ${isAdmin?`<button class="btn btn-dark btn-sm" onclick="saveGlobalShrinkages()">Définir comme référentiel global</button>`:''}
+  </div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+  <div class="card">
+    <div class="card-header"><div><div class="card-title" style="color:var(--red)">Externes</div><div class="card-sub">Base contractuelle → H.travaillées · ${pct(1-txExt())} d'absence</div></div></div>
+    ${S.shExtUser.map(s=>`<div class="sh-row"><div class="sh-name">${s.n}</div><input class="sh-inp" type="number" min="0" max="50" step="0.1" value="${s.v}" onchange="uSEuser('${s.id}',this.value)"><span style="font-size:10px;color:var(--muted)">%</span></div>`).join('')}
+    <div style="margin-top:10px;font-size:11px;color:var(--muted)">Taux de présence : <b style="color:var(--green)">${pct(txExt())}</b></div>
+  </div>
+  <div class="card">
+    <div class="card-header"><div><div class="card-title" style="color:var(--amber)">Internes</div><div class="card-sub">H.travaillées → H.productives · ${pct(1-txInt())} de non-prod</div></div></div>
+    ${S.shIntUser.map(s=>`<div class="sh-row"><div class="sh-name">${s.n}</div><input class="sh-inp" type="number" min="0" max="50" step="0.1" value="${s.v}" onchange="uSIuser('${s.id}',this.value)"><span style="font-size:10px;color:var(--muted)">%</span></div>`).join('')}
+    <div style="margin-top:10px;font-size:11px;color:var(--muted)">Taux productif : <b style="color:var(--green)">${pct(txInt())}</b></div>
+  </div>
+</div>
+<div class="card" style="margin-top:14px">
+  <div class="card-header"><div class="card-title">Référentiel global (lecture seule)</div></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;font-size:11px;color:var(--text2)">
+    <div><b style="color:var(--red)">Externes</b>${S.shExtGlobal.map(s=>`<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px dotted var(--border)"><span>${s.n}</span><b style="font-family:'JetBrains Mono',monospace">${s.v}%</b></div>`).join('')}</div>
+    <div><b style="color:var(--amber)">Internes</b>${S.shIntGlobal.map(s=>`<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px dotted var(--border)"><span>${s.n}</span><b style="font-family:'JetBrains Mono',monospace">${s.v}%</b></div>`).join('')}</div>
+  </div>
+</div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER COMPARE
+// ═══════════════════════════════════════════════════════════════
+function rCMP(){
+  const sims = visibleSims().filter(s=>s.type==='bo'||s.type==='out');
+  return `
+<div class="page-header">
+  <div><div class="page-title">Comparaison</div><div class="page-sub">Visualisez vos scénarios enregistrés côte à côte</div></div>
+</div>
+${sims.length<2?`<div class="card" style="text-align:center;padding:48px"><div style="font-size:32px;margin-bottom:12px">📋</div><div style="font-weight:600;margin-bottom:6px">Enregistrez au moins 2 scénarios</div></div>`:`
+<table class="scenario-table">
+  <thead><tr><th>Type</th><th>Nom</th><th>Résumé</th><th>Commentaire</th><th>Modifié par</th><th>Date</th></tr></thead>
+  <tbody>${sims.map(s=>`<tr onclick="editSim(${s.id})">
+    <td><span class="scenario-badge ${s.type}">${s.type==='bo'?'Back Office':'Sortants'}</span></td>
+    <td><b>${s.nm}</b></td>
+    <td style="color:var(--muted)">${s.meta||''}</td>
+    <td style="color:var(--muted)">${s.commentaire||'—'}</td>
+    <td>${s.modifiedBy||'—'}</td>
+    <td style="font-size:11px;color:var(--muted)">${fmtDate(s.date)}</td>
+  </tr>`).join('')}</tbody>
+</table>`}`;
+}
+
+
+function canEditSim(sim){
+  if(!S.user) return false;
+  if(S.user.role==='admin') return true;
+  return sim.modifiedBy === S.user.displayName;
+}
+
+window.editSim = id => {
+  const src = S.sims.find(x=>x.id===id);
+  if(!src) return;
+  if(!canEditSim(src)){
+    toast('Vous n\'avez pas accès à ce scénario', 'err');
+    return;
+  }
+  S.editingSimId = id;
+  if(src.type==='bo' && src.p) S.bo = JSON.parse(JSON.stringify(src.p));
+  else if(src.type==='out' && src.p) S.out = JSON.parse(JSON.stringify(src.p));
+  else if(src.type==='sim' && src.p) S.sim = JSON.parse(JSON.stringify(src.p));
+  resetShrinkagesToGlobal(true);
+  gotoTab(src.type);
+};
+
+window.dupSim = id => {
+  const src = S.sims.find(x=>x.id===id);
+  if(!src) return;
+  if(!canEditSim(src)){ toast('Accès refusé','err'); return; }
+  S.sims.push({
+    ...src, 
+    id: S.nid++, 
+    nm: src.nm+' (copie)', 
+    date: mkDate(),
+    modifiedBy: S.user?.displayName||'?',  // ← le duplicata appartient à celui qui copie
+    modifiedAt: new Date().toISOString()
+  });
+  saveState(); R(); gasSync(false);
+};
+
+window.xSim = id => {
+  const src = S.sims.find(x=>x.id===id);
+  if(!src) return;
+  if(!canEditSim(src)){ toast('Accès refusé','err'); return; }
+  if(!confirm('Supprimer ce scénario ?')) return;
+  S.sims = S.sims.filter(x=>x.id!==id);
+  if(S.editingSimId===id) S.editingSimId=null;
+  saveState(); R(); gasSync(false);
+};
+
+
+// ═══════════════════════════════════════════════════════════════
+// VISU PAR ROLE
+// ═══════════════════════════════════════════════════════════════
+
+function visibleSims(){
+  if(!S.user) return [];
+  // Admin voit tout
+  if(S.user.role==='admin') return S.sims;
+  // User normal ne voit que ses propres scénarios
+  const me = S.user.displayName;
+  return S.sims.filter(s => s.modifiedBy === me);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// HISTORIQUE
+// ═══════════════════════════════════════════════════════════════
+function renderHist(){
+  const el=document.getElementById('hist-mini');
+  const cnt=document.getElementById('hist-count');
+  const mySims = visibleSims();
+  if(cnt) cnt.textContent = mySims.length;
+  if(!el) return;
+  if(!mySims.length){el.innerHTML='<div style="font-size:11px;color:var(--muted);padding:6px 12px">Aucun scénario</div>';return;}
+  const HC={bo:'var(--amber-bg)',out:'var(--green-bg)',sim:'var(--purple-bg)'};
+  const HTC={bo:'var(--amber)',out:'var(--green)',sim:'var(--purple)'};
+  const HL={bo:'BO',out:'Sortant',sim:'Sim'};
+  el.innerHTML = mySims.slice().reverse().slice(0,10).map(sim=>`
+  <div class="hi-item ${S.editingSimId===sim.id?'editing':''}" onclick="editSim(${sim.id})">
+    <div class="hi-hdr">
+      <span class="hi-tag" style="background:${HC[sim.type]};color:${HTC[sim.type]}">${HL[sim.type]||sim.type}</span>
+      <div class="hi-nm">${sim.nm}</div>
+    </div>
+    <div class="hi-meta">${sim.meta||''}</div>
+  </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ADMIN
+// ═══════════════════════════════════════════════════════════════
+function rADMIN(){
+  if(!S.user||S.user.role!=='admin')return '<div style="color:var(--red);padding:20px">Accès réservé aux administrateurs.</div>';
+  const users=getUsers();
+  return `
+<div class="page-header">
+  <div><div class="page-title">Administration</div><div class="page-sub">Gestion des utilisateurs et synchronisation</div></div>
+  <div class="page-actions">
+    <button class="btn btn-outline btn-sm" onclick="gasLoadUsers().then(()=>R())">↻ Sync utilisateurs</button>
+    <button class="btn btn-dark btn-sm" onclick="showAddUser()">+ Utilisateur</button>
+  </div>
+</div>
+<div class="card">
+  <div class="card-header"><div><div class="card-title">📊 Google Sheets</div><div class="card-sub">Fichier de stockage actif</div></div>
+    <span style="font-size:10px;padding:3px 10px;border-radius:10px;background:${S.gas.connected?'var(--green-bg)':'var(--red-bg)'};color:${S.gas.connected?'var(--green)':'var(--red)'}">${S.gas.connected?'CONNECTÉ':'DÉCONNECTÉ'}</span>
+  </div>
+  <div id="gas-info-box" style="font-size:11px;color:var(--muted);margin-bottom:10px">Chargement…</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button class="btn btn-outline btn-sm" onclick="gasSync(true)">↻ Synchroniser</button>
+    <button class="btn btn-outline btn-sm" onclick="gasLoad()">⬇ Charger depuis Sheets</button>
+    <button class="btn btn-outline btn-sm" onclick="window.print()">🖨 Imprimer</button>
+  </div>
+</div>
+<div class="card">
+  <div class="card-header"><div class="card-title">Utilisateurs (${users.length})</div></div>
+  ${users.map(u=>`<div class="user-row">
+    <div class="avatar ${u.role==='admin'?'adm':''}" style="width:30px;height:30px;font-size:10px">${(u.displayName||u.username).split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()}</div>
+    <div style="flex:1"><b>${u.displayName}</b><div style="font-size:10px;color:var(--muted)">@${u.username}</div></div>
+    <span class="user-badge ${u.role==='admin'?'admin':''}">${u.role==='admin'?'Admin':'User'}</span>
+    <button class="btn btn-outline btn-sm" onclick="editUser('${u.id}')">✎</button>
+    ${u.id!=='admin'?`<button class="btn btn-outline btn-sm" style="color:var(--red)" onclick="deleteUser('${u.id}')">✕</button>`:''}
+  </div>`).join('')}
+</div>
+<div class="card" id="user-form-card" style="display:none">
+  <div class="card-header"><div class="card-title" id="user-form-title">Nouvel utilisateur</div></div>
+  <div class="form-row">
+    <div class="field"><label>Nom affiché</label><input id="uf-display" placeholder="Marie Dupont"></div>
+    <div class="field"><label>Identifiant</label><input id="uf-username" placeholder="marie.dupont"></div>
+  </div>
+  <div class="form-row">
+    <div class="field"><label>Mot de passe</label><input id="uf-pw" type="password"></div>
+    <div class="field"><label>Rôle</label><select id="uf-role"><option value="user">Utilisateur</option><option value="admin">Administrateur</option></select></div>
+  </div>
+  <div style="display:flex;gap:8px;margin-top:4px">
+    <button class="btn btn-dark btn-sm" onclick="saveUser()">Enregistrer</button>
+    <button class="btn btn-outline btn-sm" onclick="document.getElementById('user-form-card').style.display='none'">Annuler</button>
+  </div>
+</div>`;
+}
+
+// Charge info Sheets après render admin
+function loadGasInfo(){
+  if(_tab!=='admin')return;
+  gasCall({action:'info'}).then(d=>{
+    const el=document.getElementById('gas-info-box');if(!el)return;
+    el.innerHTML=`
+      <b style="color:var(--text)">${d.spreadsheetName}</b><br>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;word-break:break-all">${d.spreadsheetId}</span><br>
+      <a href="${d.spreadsheetUrl}" target="_blank" style="color:var(--accent);text-decoration:none;font-weight:600">→ Ouvrir le fichier</a><br>
+      <span style="font-size:10px">Feuilles : ${d.sheets.join(' · ')}</span>`;
+  }).catch(e=>{
+    const el=document.getElementById('gas-info-box');
+    if(el)el.innerHTML='<span style="color:var(--red)">Impossible de charger : '+e.message+'</span>';
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ACTIONS
+// ═══════════════════════════════════════════════════════════════
+window.uSEuser=(id,v)=>{const s=S.shExtUser.find(x=>x.id===id);if(s){s.v=+v||0;R();}};
+window.uSIuser=(id,v)=>{const s=S.shIntUser.find(x=>x.id===id);if(s){s.v=+v||0;R();}};
+
+window.saveGlobalShrinkages=async function(){
+  if(S.user?.role!=='admin'){toast('Réservé aux admins','err');return;}
+  if(!confirm('Définir vos valeurs comme référentiel global pour tous ?'))return;
+  S.shExtGlobal=JSON.parse(JSON.stringify(S.shExtUser));
+  S.shIntGlobal=JSON.parse(JSON.stringify(S.shIntUser));
+  saveState();R();
+  await gasSync(true);
+  toast('Référentiel global mis à jour ✓');
+};
+
+window.addActBO=()=>{S.bo.acts.push({...JSON.parse(JSON.stringify(TPL_BO)),id:S.bo.nid++,nm:'Activité '+S.bo.nid});saveState();scheduleAutoPush();R();};
+window.rmActBO=i=>{if(S.bo.acts.length<=1)return;S.bo.acts.splice(i,1);saveState();scheduleAutoPush();R();};
+window.uBO=(i,k,v)=>{S.bo.acts[i][k]=v;if(k!=='nm'&&k!=='commentaire')R();};
+window.tgCmtBO=i=>{S.bo.acts[i].showComment=!S.bo.acts[i].showComment;R();};
+window.tgJourBO=(i,j)=>{S.bo.acts[i].jours=toggleJour(S.bo.acts[i].jours||[],j);R();};
+window.setVPBO=(i,p)=>{S.bo.acts[i].volPeriod=p;R();};
+
+window.addActOUT=()=>{S.out.acts.push({...JSON.parse(JSON.stringify(TPL_OUT)),id:S.out.nid++,nm:'Activité '+S.out.nid});saveState();scheduleAutoPush();R();};
+window.rmActOUT=i=>{if(S.out.acts.length<=1)return;S.out.acts.splice(i,1);saveState();scheduleAutoPush();R();};
+window.uOUT=(i,k,v)=>{S.out.acts[i][k]=v;if(k!=='nm'&&k!=='commentaire')R();};
+window.tgCmtOUT=i=>{S.out.acts[i].showComment=!S.out.acts[i].showComment;R();};
+window.tgJourOUT=(i,j)=>{S.out.acts[i].jours=toggleJour(S.out.acts[i].jours||[],j);R();};
+window.setVPOUT=(i,p)=>{S.out.acts[i].volPeriod=p;R();};
+
+function mkDate(){return new Date().toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'});}
+function pushOrUpdate(type,nm,meta,commentaire,extra){
+  const existing=S.editingSimId?S.sims.find(x=>x.id===S.editingSimId):null;
+  const entry={id:existing?.id||S.nid++,type,nm,meta,commentaire,date:mkDate(),modifiedBy:S.user?.displayName||'?',modifiedAt:new Date().toISOString(),...extra};
+  if(existing)Object.assign(existing,entry);
+  else S.sims.push(entry);
+  S.editingSimId=null;
+  saveState();renderHist();toast('Scénario enregistré ✓');
+  gasSync(false);
+  gotoTab('dash');
+}
+
+window.saveBO=()=>{
+  const rs=S.bo.acts.map(calcBO);
+  const totETP=rs.reduce((a,r)=>a+r.etp_brut,0);
+  const totAg=rs.reduce((a,r)=>a+r.ag_recrute,0);
+  const hp=rs.reduce((a,r)=>a+r.hp,0);
+  pushOrUpdate('bo',S.bo.acts.map(a=>a.nm).join(', '),
+    `${S.bo.acts.length} act. • ${f2(totETP)} ETP • ${totAg} ag • ${f2(hp)}h prod`,
+    S.bo.acts.map(a=>a.commentaire).filter(Boolean).join(' | '),
+    {p:JSON.parse(JSON.stringify(S.bo))});
+};
+window.saveOUT=()=>{
+  const rs=S.out.acts.map(calcAct);
+  const totETP=rs.reduce((a,r)=>a+r.etp,0);
+  const totAg=rs.reduce((a,r)=>a+r.ag,0);
+  const hp=rs.reduce((a,r)=>a+r.hp,0);
+  pushOrUpdate('out',S.out.acts.map(a=>a.nm).join(', '),
+    `${S.out.acts.length} act. · ${f2(totETP)} ETP · ${totAg} ag · ${f2(hp)}h prod`,
+    S.out.acts.map(a=>a.commentaire).filter(Boolean).join(' | '),
+    {p:JSON.parse(JSON.stringify(S.out))});
+};
+window.saveSIM=()=>{
+  const res=calcSim();
+  pushOrUpdate('sim',S.sim.nm||`Sim ${f0(S.sim.vol)}`,
+    `${f2(res.hp_needed)}h prod · 1 ETP → ${f2(res.rowsETP[0].mois)} mois`,
+    S.sim.commentaire,
+    {p:JSON.parse(JSON.stringify(S.sim))});
+};
+
+function toast(msg,type='ok'){
+  const t=document.createElement('div');t.className='toast '+(type==='ok'?'':type);t.textContent=msg;
+  document.getElementById('toasts').appendChild(t);
+  setTimeout(()=>{t.style.opacity=0;setTimeout(()=>t.remove(),300);},2800);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// USERS
+// ═══════════════════════════════════════════════════════════════
+function getUsers(){
+  const defaults=[
+    {id:'admin',username:'admin',passwordHash:'wp_admin_2024',role:'admin',displayName:'Administrateur'},
+    {id:'murielle',username:'murielle',passwordHash:'mu1234',role:'admin',displayName:'RAJAONA Murielle'},
+    {id:'plan1',username:'planificateur',passwordHash:'plan_2024',role:'user',displayName:'Planificateur'}
+  ];
+  try{
+    const raw=localStorage.getItem('wp_users');
+    if(raw){const stored=JSON.parse(raw);if(stored?.length){
+      const merged=[...stored];
+      defaults.forEach(d=>{if(!merged.find(u=>u.username===d.username))merged.push(d);});
+      return merged;
+    }}
+  }catch(e){}
+  return defaults;
+}
+function saveUsers(users){try{localStorage.setItem('wp_users',JSON.stringify(users));}catch(e){}}
+
+let _editingUserId=null;
+window.showAddUser=()=>{
+  _editingUserId=null;
+  document.getElementById('user-form-title').textContent='Nouvel utilisateur';
+  ['uf-display','uf-username','uf-pw'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('uf-role').value='user';
+  document.getElementById('user-form-card').style.display='block';
+};
+window.editUser=id=>{
+  const u=getUsers().find(x=>x.id===id);if(!u)return;
+  _editingUserId=id;
+  document.getElementById('user-form-title').textContent='Modifier '+u.displayName;
+  document.getElementById('uf-display').value=u.displayName;
+  document.getElementById('uf-username').value=u.username;
+  document.getElementById('uf-pw').value='';
+  document.getElementById('uf-role').value=u.role;
+  document.getElementById('user-form-card').style.display='block';
+};
+window.saveUser=()=>{
+  const users=getUsers();
+  const display=document.getElementById('uf-display').value.trim();
+  const username=document.getElementById('uf-username').value.trim();
+  const pw=document.getElementById('uf-pw').value;
+  const role=document.getElementById('uf-role').value;
+  if(!display||!username){toast('Nom et identifiant requis','err');return;}
+  if(_editingUserId){const u=users.find(x=>x.id===_editingUserId);if(u){u.displayName=display;u.username=username;if(pw)u.passwordHash=pw;u.role=role;}}
+  else{if(!pw){toast('Mot de passe requis','err');return;}users.push({id:'u_'+Date.now(),username,passwordHash:pw,role,displayName:display});}
+  saveUsers(users);
+  document.getElementById('user-form-card').style.display='none';
+  _editingUserId=null;
+  gasPushUsers();toast('Utilisateur enregistré ✓');R();
+};
+window.deleteUser=id=>{if(!confirm('Supprimer ?'))return;saveUsers(getUsers().filter(u=>u.id!==id));gasPushUsers();toast('Supprimé');R();};
+
+// ═══════════════════════════════════════════════════════════════
+// EXPORT PDF (récap 1 page — logo + tableaux teal)
+// ═══════════════════════════════════════════════════════════════
+function pdfHeader(subtitle){
+  const now=new Date();
+  const dateStr=now.toLocaleDateString('fr-FR')+' à '+now.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+  return `
+  <div class="pdf-header">
+    <div class="pdf-logo">WP</div>
+    <div>
+      <div class="pdf-brand">Workforce Planner</div>
+      <div class="pdf-brand-sub">${subtitle}</div>
+    </div>
+    <div class="pdf-meta">Généré le ${dateStr}<br>${S.user?.displayName||''}</div>
+  </div>`;
+}
+function pdfShrinkTable(period){
+  period=period||'mois';
+  const base=capaAgentBase(period);
+  const baseLbl=period==='jour'?'jour':period==='semaine'?'semaine':'mois';
+  const apresExt=base*txExt(); // Base × pe (somme additive des % externes)
+  const apresInt=apresExt*txInt(); // (Base×pe) × pi (somme additive des % internes)
+  const extRows=S.shExtUser.map(s=>`<tr><td>${s.n}</td><td class="num">${f1(s.v)}%</td><td class="num">${f2(base*(+s.v||0)/100)} h</td></tr>`).join('');
+  const intRows=S.shIntUser.map(s=>`<tr><td>${s.n}</td><td class="num">${f1(s.v)}%</td><td class="num">${f2(apresExt*(+s.v||0)/100)} h</td></tr>`).join('');
+  return `
+  <div class="pdf-section-title">Hypothèses & Shrinkages — base ${baseLbl}</div>
+  <table class="pdf-table">
+    <tr><th>Hypothèses</th><th class="num">Taux</th><th class="num">Durée (sur ${f2(base)} h/${baseLbl})</th></tr>
+    <tr><td>Base contractuelle (${baseLbl})</td><td class="num">100,0%</td><td class="num">${f2(base)} h</td></tr>
+    ${extRows}
+    <tr><td><b>Taux de présence (externes)</b></td><td class="num"><b>${pct(txExt())}</b></td><td class="num"><b>${f2(apresExt)} h</b></td></tr>
+    ${intRows}
+    <tr><td><b>Taux productif (internes)</b></td><td class="num"><b>${pct(txInt())}</b></td><td class="num"><b>${f2(apresInt)} h</b></td></tr>
+  </table>`;
+}
+function pdfRecapBO(){
+  const acts=S.bo.acts, results=acts.map(calcBO);
+  const totETP=results.reduce((a,r)=>a+r.etp_brut,0);
+  const totAg=results.reduce((a,r)=>a+r.ag_recrute,0);
+  const totVol=acts.reduce((a,x)=>a+(+x.vol||0),0);
+  let html=pdfHeader('Back Office — Récapitulatif de dimensionnement');
+  html+=`<div class="pdf-kpis">
+    <div class="pdf-kpi"><div class="pdf-kpi-lbl">Activités</div><div class="pdf-kpi-val">${acts.length}</div></div>
+    <div class="pdf-kpi"><div class="pdf-kpi-lbl">Volume total</div><div class="pdf-kpi-val">${f1(totVol)}</div></div>
+    <div class="pdf-kpi"><div class="pdf-kpi-lbl">ETP (Noyaux durs)</div><div class="pdf-kpi-val">${f2(totETP)}</div></div>
+    <div class="pdf-kpi"><div class="pdf-kpi-lbl">Agents à recruter</div><div class="pdf-kpi-val">${totAg}</div></div>
+  </div>`;
+  html+=`<div class="pdf-section-title">Dimensionnement par activité</div>
+  <table class="pdf-table">
+    <tr><th>Activité</th><th class="num">Volume</th><th class="num">DMT</th><th class="num">H.prod</th><th class="num">ETP</th><th class="num">Agents</th><th class="num">Actes/ag.</th></tr>
+    ${acts.map((a,i)=>{const r=results[i];const period=a.volPeriod||'mois';
+      const apa=period==='jour'?r.actesParAgent.jour:period==='semaine'?r.actesParAgent.sem:r.actesParAgent.mois;
+      return `<tr><td>${a.nm||'Activité '+(i+1)}</td><td class="num">${f1(a.vol)}/${period==='jour'?'j':period==='semaine'?'sem':'mois'}</td><td class="num">${a.dmt}s</td><td class="num">${f1(r.hp)}h</td><td class="num">${f2(r.etp_brut)}</td><td class="num">${r.ag_recrute}</td><td class="num">${f1(apa)}</td></tr>`;}).join('')}
+    <tr class="total"><td>TOTAL</td><td class="num"></td><td class="num"></td><td class="num"></td><td class="num">${f2(totETP)}</td><td class="num">${totAg}</td><td class="num"></td></tr>
+  </table>`;
+  const periodesUtilisees=[...new Set(acts.map(a=>a.volPeriod||'mois'))];
+  html+=periodesUtilisees.map(p=>pdfShrinkTable(p)).join('');
+  html+=`<div class="pdf-foot">Workforce Planner · Dimensionnement Back Office · Document généré automatiquement</div>`;
+  return html;
+}
+function pdfRecapOUT(){
+  const acts=S.out.acts, results=acts.map(calcAct);
+  const totETP=results.reduce((a,r)=>a+r.etp,0);
+  const totAg=results.reduce((a,r)=>a+r.ag,0);
+  const totVol=acts.reduce((a,x)=>a+(+x.vol||0),0);
+  let html=pdfHeader('Appels Sortants — Récapitulatif de dimensionnement');
+  html+=`<div class="pdf-kpis">
+    <div class="pdf-kpi"><div class="pdf-kpi-lbl">Activités</div><div class="pdf-kpi-val">${acts.length}</div></div>
+    <div class="pdf-kpi"><div class="pdf-kpi-lbl">Fiches total</div><div class="pdf-kpi-val">${f1(totVol)}</div></div>
+    <div class="pdf-kpi"><div class="pdf-kpi-lbl">ETP (Noyaux durs)</div><div class="pdf-kpi-val">${f2(totETP)}</div></div>
+    <div class="pdf-kpi"><div class="pdf-kpi-lbl">Agents à recruter</div><div class="pdf-kpi-val">${totAg}</div></div>
+  </div>`;
+  html+=`<div class="pdf-section-title">Dimensionnement par activité</div>
+  <table class="pdf-table">
+    <tr><th>Activité</th><th class="num">Fiches</th><th class="num">Aboutis</th><th class="num">H.prod</th><th class="num">ETP</th><th class="num">Agents</th><th class="num">Ab./ag.</th></tr>
+    ${acts.map((a,i)=>{const r=results[i];const period=a.volPeriod||'mois';
+      const apa=period==='jour'?r.actesParAgent.jour:period==='semaine'?r.actesParAgent.sem:r.actesParAgent.mois;
+      return `<tr><td>${a.nm||'Activité '+(i+1)}</td><td class="num">${f1(a.vol)}/${period==='jour'?'j':period==='semaine'?'sem':'mois'}</td><td class="num">${f1(r.ab)}</td><td class="num">${f1(r.hp)}h</td><td class="num">${f2(r.etp)}</td><td class="num">${r.ag}</td><td class="num">${f1(apa)}</td></tr>`;}).join('')}
+    <tr class="total"><td>TOTAL</td><td class="num"></td><td class="num"></td><td class="num"></td><td class="num">${f2(totETP)}</td><td class="num">${totAg}</td><td class="num"></td></tr>
+  </table>`;
+  const periodesUtilisees=[...new Set(acts.map(a=>a.volPeriod||'mois'))];
+  html+=periodesUtilisees.map(p=>pdfShrinkTable(p)).join('');
+  html+=`<div class="pdf-foot">Workforce Planner · Dimensionnement Appels Sortants · Document généré automatiquement</div>`;
+  return html;
+}
+function pdfRecapSIM(){
+  const sim=S.sim,res=calcSim();
+  const pe=txExt(),pi=txInt();
+  let html=pdfHeader('Simulation ETP — Récapitulatif');
+  html+=`<div class="pdf-kpis">
+    <div class="pdf-kpi"><div class="pdf-kpi-lbl">Type</div><div class="pdf-kpi-val" style="font-size:12px">${sim.type==='bo'?'Back Office':'Sortants'}</div></div>
+    <div class="pdf-kpi"><div class="pdf-kpi-lbl">Volume</div><div class="pdf-kpi-val">${f1(sim.vol)}</div></div>
+    <div class="pdf-kpi"><div class="pdf-kpi-lbl">H.travaillées (besoin)</div><div class="pdf-kpi-val">${f1(res.htrav_needed)}</div></div>
+  </div>`;
+  // 3 tableaux compacts côte à côte : Mois / Semaines / Jours (limités aux 8 premières lignes pour tenir sur la page)
+  const mkRows=(rows)=>rows.slice(0,5).map(r=>`<tr><td>${r.n}</td><td class="num">${f2(r.etp)}</td><td class="num">${r.ag}</td><td class="num">${f1(r.actesParAgent)}</td><td class="num">${f1(r.actesParETP)}</td></tr>`).join('');
+  html+=`<div class="pdf-section-title">${sim.nm?sim.nm+' — ':''}Durée de traitement → ETP, Agents & Actes</div>
+  <table class="pdf-table pdf-mini-table" style="display:inline-table;width:32.5%;vertical-align:top;margin-right:1%">
+    <tr><th colspan="5">Par mois</th></tr>
+    <tr><th>Dur.</th><th class="num">ETP</th><th class="num">Ag.</th><th class="num">Act/ag</th><th class="num">Act/ETP</th></tr>
+    ${mkRows(res.rowsMois)}
+  </table>
+  <table class="pdf-table pdf-mini-table" style="display:inline-table;width:32.5%;vertical-align:top;margin-right:1%">
+    <tr><th colspan="5">Par semaine</th></tr>
+    <tr><th>Dur.</th><th class="num">ETP</th><th class="num">Ag.</th><th class="num">Act/ag</th><th class="num">Act/ETP</th></tr>
+    ${mkRows(res.rowsSem)}
+  </table>
+  <table class="pdf-table pdf-mini-table" style="display:inline-table;width:32.5%;vertical-align:top">
+    <tr><th colspan="5">Par jour</th></tr>
+    <tr><th>Dur.</th><th class="num">ETP</th><th class="num">Ag.</th><th class="num">Act/ag</th><th class="num">Act/ETP</th></tr>
+    ${mkRows(res.rowsJour)}
+  </table>`;
+  html+=pdfShrinkTable('mois');
+  html+=`<div class="pdf-foot">Workforce Planner · Simulation ETP · Document généré automatiquement</div>`;
+  return html;
+}
+window.exportPDF=(tab)=>{
+  const zone=document.getElementById('pdf-export-zone');
+  if(tab==='bo')zone.innerHTML=pdfRecapBO();
+  else if(tab==='out')zone.innerHTML=pdfRecapOUT();
+  else if(tab==='sim')zone.innerHTML=pdfRecapSIM();
+  document.body.classList.add('pdf-compact');
+  const cleanup=()=>{document.body.classList.remove('pdf-compact');zone.innerHTML='';window.removeEventListener('afterprint',cleanup);};
+  window.addEventListener('afterprint',cleanup);
+  setTimeout(()=>{window.print();setTimeout(cleanup,1000);},50);
+};
+
+// ═══════════════════════════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════════════════════════
+async function doLogin(){
+  const uIn=(document.getElementById('login-user').value||'').trim();
+  const pIn=document.getElementById('login-pw').value||'';
+  const errEl=document.getElementById('login-err');errEl.classList.remove('show');
+  if(!uIn||!pIn){showLoginErr('Identifiant et mot de passe requis.');return;}
+  const btn=document.getElementById('btn-login');btn.disabled=true;btn.textContent='Connexion…';
+  try{await gasLoadUsers();}catch(e){}
+  const users=getUsers();
+  const found=users.find(u=>(u.username||'').toLowerCase()===uIn.toLowerCase()&&u.passwordHash===pIn);
+  if(found){
+    S.user={id:found.id,username:found.username,role:found.role,displayName:found.displayName,loginAt:new Date().toISOString()};
+    localStorage.setItem('wp_user',JSON.stringify(S.user));
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app').classList.add('show');
+    updateUserBar();gasLoad();startAutoSync();gotoTab('dash');
+  }else{
+    showLoginErr('Identifiant ou mot de passe incorrect.');
+    document.getElementById('login-pw').value='';document.getElementById('login-pw').focus();
+  }
+  btn.disabled=false;btn.textContent='Se connecter';
+}
+function showLoginErr(msg){const e=document.getElementById('login-err');e.textContent=msg;e.classList.add('show');}
+function doLogout(){S.user=null;localStorage.removeItem('wp_user');stopAutoSync();document.getElementById('app').classList.remove('show');document.getElementById('login-screen').style.display='flex';document.getElementById('login-user').value='';document.getElementById('login-pw').value='';}
+function checkAuth(){if(!S.user){document.getElementById('login-screen').style.display='flex';document.getElementById('app').classList.remove('show');return false;}document.getElementById('login-screen').style.display='none';document.getElementById('app').classList.add('show');return true;}
+function updateUserBar(){
+  if(!S.user)return;
+  const av=document.getElementById('sb-av');
+  const ini=(S.user.displayName||S.user.username||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  av.textContent=ini;av.className='avatar '+(S.user.role==='admin'?'adm':'');
+  document.getElementById('sb-name').textContent=S.user.displayName||S.user.username;
+  document.getElementById('sb-role').textContent=S.user.role==='admin'?'Administrateur':'Utilisateur';
+  const slot=document.getElementById('nav-admin-slot');
+  slot.innerHTML=S.user.role==='admin'?`
+  <div class="nav-section"><div class="nav-label">Administration</div>
+    <button class="nav-item" data-tab="admin" onclick="gotoAdmin()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      Utilisateurs
+    </button>
+  </div>`:'';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// GAS
+// ═══════════════════════════════════════════════════════════════
+function gasCall(payload){
+  return new Promise((resolve,reject)=>{
+    const cb='_gas_cb_'+Date.now()+Math.floor(Math.random()*9999);
+    const timer=setTimeout(()=>{cleanup(cb);reject(new Error('Timeout'));},30000);
+    window[cb]=(data)=>{clearTimeout(timer);cleanup(cb);
+      if(data&&data.status==='error')reject(new Error(data.message||data.error||'Erreur GAS'));
+      else resolve(data);};
+    const qs='callback='+cb+'&payload='+encodeURIComponent(JSON.stringify(payload))+'&t='+Date.now();
+    const s=document.createElement('script');s.src=GAS_URL+'?'+qs;
+    s.onerror=()=>{clearTimeout(timer);cleanup(cb);reject(new Error('Réseau'));};
+    document.head.appendChild(s);
+  });
+}
+function cleanup(cb){window[cb]=()=>{};setTimeout(()=>{delete window[cb];},30000);document.querySelectorAll('script[src*="macros"]').forEach(e=>{if(e.src.includes(cb))e.remove();});}
+
+function setSyncStatus(state,msg){
+  const dot=document.getElementById('sync-dot');const st=document.getElementById('sync-status');const ls=document.getElementById('last-sync');
+  if(dot)dot.className='sync-dot '+(state||'');
+  if(st)st.textContent=msg||'Hors ligne';
+  if(state==='ok'){S.gas.connected=true;S.gas.lastSync=new Date();if(ls)ls.textContent='Maj '+S.gas.lastSync.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});}
+  if(state==='err')S.gas.connected=false;
+}
+
+async function gasSync(showToast){
+  if(S.gas.busy)return;
+  S.gas.busy=true;setSyncStatus('busy','Synchronisation…');
+  try{
+    const data=await gasCall({
+      action:'sync',user:S.user?.displayName||'?',
+      shExt:S.shExtGlobal,shInt:S.shIntGlobal,
+      bo:S.bo,out:S.out,sim:S.sim,sims:S.sims
+    });
+    if(data.status==='ok'){
+      if(data.sims){
+        const m={};S.sims.forEach(s=>m[s.id]=s);
+        data.sims.forEach(s=>{const l=m[s.id];if(!l||(s.modifiedAt&&l.modifiedAt&&s.modifiedAt>l.modifiedAt))m[s.id]=s;});
+        S.sims=Object.values(m);
+      }
+      if(data.shExt?.length)S.shExtGlobal=data.shExt;
+      if(data.shInt?.length)S.shIntGlobal=data.shInt;
+      saveState();setSyncStatus('ok','Synchronisé');
+      if(showToast)toast('Synchronisé ✓');
+      renderHist();renderRSidebar();
+    }else throw new Error(data.message||'Erreur');
+  }catch(e){
+    setSyncStatus('err','Erreur sync');
+    if(showToast)toast('Erreur : '+e.message,'err');
+  }
+  S.gas.busy=false;
+}
+
+async function gasLoad(){
+  setSyncStatus('busy','Chargement…');
+  try{
+    const data=await gasCall({action:'load',user:S.user?.displayName||'?'});
+    if(data.status==='ok'){
+      if(data.sims)S.sims=data.sims;
+      if(data.shExt?.length){S.shExtGlobal=data.shExt;if(!shrinkagesModified())S.shExtUser=JSON.parse(JSON.stringify(data.shExt));}
+      if(data.shInt?.length){S.shIntGlobal=data.shInt;if(!shrinkagesModified())S.shIntUser=JSON.parse(JSON.stringify(data.shInt));}
+      saveState();R();setSyncStatus('ok','Chargé');
+    }else throw new Error(data.message);
+  }catch(e){setSyncStatus('err','Erreur chargement');}
+}
+
+async function gasLoadUsers(){
+  try{
+    const data=await gasCall({action:'users'});
+    if(data.status==='ok'&&data.users?.length){
+      const local=getUsers();const merged=[...local];
+      data.users.forEach(gu=>{const i=merged.findIndex(u=>u.username===gu.username);if(i>=0)merged[i]={...merged[i],...gu};else merged.push(gu);});
+      saveUsers(merged);
+    }
+  }catch(e){}
+}
+async function gasPushUsers(){try{await gasCall({action:'users',users:getUsers()});}catch(e){}}
+
+let _autoTimer=null,_pushTimer=null;
+// Sync périodique désactivée : la synchro se fait uniquement à la connexion,
+// au chargement de page, à la sauvegarde manuelle, et automatiquement après
+// chaque modification/ajout/suppression (voir scheduleAutoPush).
+function startAutoSync(){stopAutoSync();}
+function stopAutoSync(){if(_autoTimer)clearInterval(_autoTimer);_autoTimer=null;}
+function scheduleAutoPush(){
+  if(_pushTimer)clearTimeout(_pushTimer);
+  _pushTimer=setTimeout(()=>{
+    if(!S.user||S.gas.busy)return;
+    gasCall({action:'push',user:S.user?.displayName||'?',bo:S.bo,out:S.out,sim:S.sim,sims:S.sims})
+      .then(()=>setSyncStatus('ok','Sauvegardé'))
+      .catch(()=>setSyncStatus('err','Erreur sauvegarde'));
+  },SAVE_DEBOUNCE_MS);
+}
+
+// Hook: refresh gas info quand on entre dans admin
+const origR=R;
+window.R=function(){origR();if(_tab==='admin')setTimeout(loadGasInfo,200);};
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+if(S.user){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app').classList.add('show');
+  updateUserBar();gotoTab('dash');gasLoad();startAutoSync();
+}else{
+  document.getElementById('login-screen').style.display='flex';
+}
+</script>
+</body>
+</html>
